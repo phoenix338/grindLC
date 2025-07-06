@@ -224,7 +224,7 @@ const Problems = () => {
 
     const handleFeedbackSubmit = async () => {
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3002/api'}/feedback/submit`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3003/api'}/feedback/submit`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -237,7 +237,7 @@ const Problems = () => {
             }
 
             const data = await response.json();
-            alert(`Feedback submitted successfully! (${data.totalFeedbacks}/20 feedbacks stored)`);
+            alert(`Feedback submitted successfully!`);
             setFeedback('');
         } catch (error) {
             console.error('Error submitting feedback:', error);

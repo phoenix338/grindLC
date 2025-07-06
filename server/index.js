@@ -18,4 +18,7 @@ app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
 import problemRoutes from './routes/problemRoute.js';
+import feedbackRoutes from './routes/feedbackroute.js';
+
 app.use('/api/problems', problemRoutes);
+app.use('/api/feedback', feedbackRoutes);
