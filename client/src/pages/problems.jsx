@@ -224,7 +224,7 @@ const Problems = () => {
 
     const handleFeedbackSubmit = async () => {
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3003/api'}/feedback/submit`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/feedback/submit`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -454,7 +454,9 @@ const Problems = () => {
                         </tbody>
                     </table>
                 </div>
-
+                <p class="rating-na-note">
+                    * Ratings marked as "N/A" are for older problems and may not have official rating data.
+                </p>
                 {/* Pagination */}
                 {totalPages > 1 && (
                     <div className="pagination">

@@ -442,3 +442,9 @@ body {
 .theme-toggle-btn:hover {
     color: var(--accent-hard);
 }
+
+.rating-na-note {
+    font-size: 15px;
+    margin-top: 20px;
+    color: var(--text);
+}
