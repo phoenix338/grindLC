@@ -22,3 +22,6 @@ import feedbackRoutes from './routes/feedbackroute.js';
 
 app.use('/api/problems', problemRoutes);
 app.use('/api/feedback', feedbackRoutes);
+import visitRoutes from './routes/visitroute.js';
+
+app.use('/api/visits', visitRoutes);

@@ -1,10 +1,11 @@
 import './styles.css';
-import Problems from './pages/problems';
+import Problems, { VisitCounter } from './pages/problems';
 
 function App() {
   return (
     <div className="container">
       <Problems />
+      <VisitCounter />
     </div>
   );
 }

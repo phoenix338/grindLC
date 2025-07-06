@@ -502,4 +502,40 @@ const Problems = () => {
     );
 };
 
+
 export default Problems;
+
+
+export const VisitCounter = () => {
+    const [visits, setVisits] = useState(null);
+
+    useEffect(() => {
+        fetch(`${import.meta.env.VITE_API_URL}/api/visits`)
+            .then(res => res.json())
+            .then(data => {
+                setVisits(data.total);
+            })
+            .catch(err => console.error(err));
+    }, []);
+
+    const formatted = visits !== null ? visits.toLocaleString("en-IN") : '...';
+
+    return (
+        <div
+            style={{
+                background: 'linear-gradient(135deg, #2563eb, #1e40af)',
+                color: 'white',
+                padding: '16px 32px',
+                borderRadius: '12px',
+                maxWidth: '280px',
+                margin: '2rem auto',
+                textAlign: 'center',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                fontFamily: 'Segoe UI, Tahoma, sans-serif',
+            }}
+        >
+            <div style={{ fontSize: '26px' }}>👁️ {formatted}</div>
+            <div style={{ fontSize: '14px', opacity: 0.9 }}>Total Visits</div>
+        </div>
+    );
+};
