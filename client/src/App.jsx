@@ -1,11 +1,15 @@
 import './styles.css';
-import Problems, { VisitCounter } from './pages/problems';
+import Problems from './pages/problems';
+import { VisitCounter } from './pages/problems';
+import { useState } from 'react';
 
 function App() {
+  const [showCounter, setShowCounter] = useState(false);
+
   return (
     <div className="container">
-      <Problems />
-      <VisitCounter />
+      <Problems onLoaded={() => setShowCounter(true)} />
+      {showCounter && <VisitCounter />}
     </div>
   );
 }

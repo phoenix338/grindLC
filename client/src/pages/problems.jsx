@@ -4,7 +4,7 @@ import '../styles.css';
 
 const unique = (arr) => Array.from(new Set(arr.filter(Boolean)));
 
-const Problems = () => {
+const Problems = ({ onLoaded }) => {
     const [problems, setProblems] = useState([]);
     const [filteredProblems, setFilteredProblems] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -73,6 +73,7 @@ const Problems = () => {
                 }));
 
                 setProblems(validProblems);
+                onLoaded && onLoaded();
                 setLoading(false);
             } catch (err) {
                 setError(err.message);
@@ -454,7 +455,7 @@ const Problems = () => {
                         </tbody>
                     </table>
                 </div>
-                <p class="rating-na-note">
+                <p className="rating-na-note">
                     * Ratings marked as "N/A" are for older problems and may not have official rating data.
                 </p>
                 {/* Pagination */}
@@ -510,7 +511,7 @@ export const VisitCounter = () => {
     const [visits, setVisits] = useState(null);
 
     useEffect(() => {
-        fetch(`${import.meta.env.VITE_API_URL}/api/visits`)
+        fetch(`${import.meta.env.VITE_API_URL}/visits`)
             .then(res => res.json())
             .then(data => {
                 setVisits(data.total);
@@ -518,8 +519,8 @@ export const VisitCounter = () => {
             .catch(err => console.error(err));
     }, []);
 
-    const formatted = visits !== null ? visits.toLocaleString("en-IN") : '...';
-
+    const formatted =
+        typeof visits === 'number' ? visits.toLocaleString('en-IN') : '...';
     return (
         <div
             style={{
@@ -534,8 +535,8 @@ export const VisitCounter = () => {
                 fontFamily: 'Segoe UI, Tahoma, sans-serif',
             }}
         >
-            <div style={{ fontSize: '26px' }}>👁️ {formatted}</div>
-            <div style={{ fontSize: '14px', opacity: 0.9 }}>Total Visits</div>
+            <div style={{ fontSize: '20px' }}>{formatted}</div>
+            <div style={{ fontSize: '14px', opacity: 0.9 }}>Total Api Hits</div>
         </div>
     );
 };
