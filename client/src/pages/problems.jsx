@@ -396,14 +396,14 @@ const Problems = ({ onLoaded }) => {
                                     key={problem.id}
                                     className={completedProblems.includes(problem.id) ? 'completed-row' : ''}
                                 >
-                                    <td>{problem.id}</td>
-                                    <td>
+                                    <td data-label="ID">{problem.id}</td>
+                                    <td data-label="Title">
                                         <a href={problem.url} target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'underline' }}>
                                             {problem.title}
                                         </a>
                                     </td>
                                     {showTopics && (
-                                        <td>
+                                        <td data-label="Topics">
                                             <div>
                                                 {problem.topics.slice(0, 3).map((topic, index) => (
                                                     <span key={index} className="topic-badge">{topic}</span>
@@ -411,7 +411,7 @@ const Problems = ({ onLoaded }) => {
                                             </div>
                                         </td>
                                     )}
-                                    <td>
+                                    <td data-label="Companies">
                                         <div>
                                             {(expandedCompanies[problem.id] ? problem.companies : problem.companies.slice(0, 3)).map((company, index) => (
                                                 <span key={index} className="company-badge">{company}</span>
@@ -419,7 +419,7 @@ const Problems = ({ onLoaded }) => {
                                             {problem.companies.length > 3 && !expandedCompanies[problem.id] && (
                                                 <span
                                                     className="company-badge"
-                                                    style={{ cursor: 'pointer', background: '#e0e7ff', color: '#3730a3' }}
+                                                    style={{ cursor: 'pointer' }}
                                                     onClick={() => toggleCompanies(problem.id)}
                                                 >
                                                     +{problem.companies.length - 3}
@@ -428,7 +428,7 @@ const Problems = ({ onLoaded }) => {
                                             {problem.companies.length > 3 && expandedCompanies[problem.id] && (
                                                 <span
                                                     className="company-badge"
-                                                    style={{ cursor: 'pointer', background: '#e0e7ff', color: '#3730a3' }}
+                                                    style={{ cursor: 'pointer' }}
                                                     onClick={() => toggleCompanies(problem.id)}
                                                 >
                                                     …
@@ -436,13 +436,13 @@ const Problems = ({ onLoaded }) => {
                                             )}
                                         </div>
                                     </td>
-                                    <td>
+                                    <td data-label="Difficulty">
                                         <span className={`difficulty-badge difficulty-${problem.difficulty}`}>
                                             {problem.difficulty}
                                         </span>
                                     </td>
-                                    <td>{problem.rating || 'N/A'}</td>
-                                    <td>
+                                    <td data-label="Rating">{problem.rating || 'N/A'}</td>
+                                    <td data-label="Status">
                                         <button
                                             onClick={() => toggleCompleted(problem.id)}
                                             className={`status-btn${completedProblems.includes(problem.id) ? ' completed' : ''}`}
@@ -450,6 +450,7 @@ const Problems = ({ onLoaded }) => {
                                             {completedProblems.includes(problem.id) ? 'Done' : 'Mark Done'}
                                         </button>
                                     </td>
+
                                 </tr>
                             ))}
                         </tbody>

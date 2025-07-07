@@ -448,3 +448,136 @@ body {
     margin-top: 20px;
     color: var(--text);
 }
+
+@media (max-width: 768px) {
+    .filters-section {
+        flex-direction: column;
+        gap: 10px;
+        padding: 1rem;
+    }
+
+    .filters-section input,
+    .filters-section select,
+    .filters-section button {
+        font-size: 13px;
+        padding: 8px;
+        width: 100%;
+    }
+
+    .filters-bottom {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filters-bottom button {
+        font-size: 15px;
+        padding: 10px;
+        width: 100%;
+    }
+
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1rem;
+    }
+
+    .navbar-title {
+        font-size: 20px;
+    }
+
+    .navbar-diff {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .problems-container {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        text-align: center;
+    }
+
+    .navbar-title {
+        flex-direction: column;
+        align-items: center;
+        font-size: 20px;
+    }
+
+    .navbar-progress {
+        margin-left: 0;
+        font-size: 13px;
+    }
+
+    .navbar-diff {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .theme-toggle-btn {
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .problems-table {
+        display: block;
+    }
+
+    .problems-table thead {
+        display: none;
+    }
+
+    .problems-table tr {
+        display: flex;
+        flex-direction: column;
+        padding: 12px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        margin-bottom: 12px;
+        background: var(--card-bg);
+    }
+
+    .problems-table td {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        font-size: 14px;
+        border: none;
+    }
+
+    .problems-table td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: var(--text);
+        margin-right: 10px;
+    }
+
+    .status-btn {
+        align-self: flex-end;
+        margin-top: 10px;
+    }
+}
+
+.problems-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+}
+
+.problems-table-container::-webkit-scrollbar {
+    height: 4px;
+}
+
+.problems-table-container::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 2px;
+}
