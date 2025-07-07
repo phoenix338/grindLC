@@ -3,8 +3,8 @@ import cors from 'cors'
 import connectDB from './db.js'
 import dotenv from 'dotenv'
 const app = express();
-const PORT = process.env.PORT;
-
+const PORT = process.env.PORT || 10000;
+const HOST = '0.0.0.0';
 connectDB();
 
 app.use(cors());
@@ -14,8 +14,8 @@ app.get('/', (req, res) => {
     res.send('Backend is running!');
 });
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+app.listen(PORT, HOST, () => {
+    console.log(`Server running on http://${HOST}:${PORT}`);
 });
 import problemRoutes from './routes/problemRoute.js';
 import feedbackRoutes from './routes/feedbackroute.js';
