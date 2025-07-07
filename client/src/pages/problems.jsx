@@ -24,11 +24,21 @@ const Problems = ({ onLoaded }) => {
     const [feedback, setFeedback] = useState('');
     const [expandedCompanies, setExpandedCompanies] = useState({});
     const [currentPage, setCurrentPage] = useState(1);
-    const problemsPerPage = 20;
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+    const problemsPerPage = isMobile ? 10 : 20;
     const [difficultyStats, setDifficultyStats] = useState({ easy: { total: 0, completed: 0 }, medium: { total: 0, completed: 0 }, hard: { total: 0, completed: 0 } });
     const [theme, setTheme] = useState(() => {
         return localStorage.getItem('theme') || 'light';
     });
+
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     useEffect(() => {
         if (theme === 'dark') {
@@ -311,33 +321,30 @@ const Problems = ({ onLoaded }) => {
                     <div className="filters-top">
                         <input
                             type="text"
+                            className="compact-filter"
                             placeholder="Search problems..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                         />
-
-                        <select value={companyFilter} onChange={(e) => setCompanyFilter(e.target.value)}>
+                        <select value={companyFilter} onChange={(e) => setCompanyFilter(e.target.value)} className="compact-filter">
                             <option value="">All Companies</option>
                             {allCompanies.map((company) => (
                                 <option key={company} value={company}>{company}</option>
                             ))}
                         </select>
-
-                        <select value={difficultyFilter} onChange={(e) => setDifficultyFilter(e.target.value)}>
+                        <select value={difficultyFilter} onChange={(e) => setDifficultyFilter(e.target.value)} className="compact-filter">
                             <option value="">All Difficulties</option>
                             {allDifficulties.map((diff) => (
                                 <option key={diff} value={diff}>{diff.charAt(0).toUpperCase() + diff.slice(1)}</option>
                             ))}
                         </select>
-
-                        <select value={topicFilter} onChange={(e) => setTopicFilter(e.target.value)}>
+                        <select value={topicFilter} onChange={(e) => setTopicFilter(e.target.value)} className="compact-filter">
                             <option value="">All Topics</option>
                             {allTopics.map((topic) => (
                                 <option key={topic} value={topic}>{topic}</option>
                             ))}
                         </select>
-
-                        <div className="rating-input-group">
+                        <div className="rating-input-group compact-filter">
                             <input
                                 type="number"
                                 placeholder="Min Rating"
@@ -352,7 +359,6 @@ const Problems = ({ onLoaded }) => {
                             />
                         </div>
                     </div>
-
                     <div className="filters-bottom">
                         <button onClick={() => setShowTopics(!showTopics)}>
                             {showTopics ? 'Hide Topics' : 'Show Topics'}
@@ -364,98 +370,175 @@ const Problems = ({ onLoaded }) => {
 
 
                 { }
-                <div className="problems-table-container">
-                    <table className="problems-table">
-                        <thead>
-                            <tr>
-                                <th onClick={() => setSortConfig(prev => ({ key: 'id', direction: prev.key === 'id' && prev.direction === 'asc' ? 'desc' : 'asc' }))}>
-                                    ID {sortConfig.key === 'id' && (sortConfig.direction === 'asc' ? '▲' : '▼')}
-                                </th>
-                                <th>Title</th>
-                                {showTopics && <th>Topics</th>}
-                                <th>Companies</th>
-                                <th onClick={() => setSortConfig(prev => ({ key: 'difficulty', direction: prev.key === 'difficulty' && prev.direction === 'asc' ? 'desc' : 'asc' }))}>
-                                    Difficulty {sortConfig.key === 'difficulty' && (sortConfig.direction === 'asc' ? '▲' : '▼')}
-                                </th>
-                                <th
-                                    className={`sortable ${sortConfig.key === 'rating' ? 'sort-active' : ''} ${sortConfig.direction === 'asc' ? 'sort-asc' : ''}`}
-                                    onClick={() => setSortConfig(prev => ({
-                                        key: 'rating',
-                                        direction: prev.key === 'rating' && prev.direction === 'asc' ? 'desc' : 'asc'
-                                    }))}
-                                >
-                                    Rating <span className="sort-arrow">▲</span>
-                                </th>
 
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {currentProblems.map((problem, idx) => (
-                                <tr
-                                    key={problem.id}
-                                    className={completedProblems.includes(problem.id) ? 'completed-row' : ''}
+                { }
+                {isMobile && (
+                    <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'flex-end' }}>
+                        <select
+                            value={sortConfig.key}
+                            onChange={e => setSortConfig({ key: e.target.value, direction: sortConfig.direction })}
+                            style={{ fontSize: 14, padding: '6px 10px', borderRadius: 6 }}
+                        >
+                            <option value="rating">Sort by Rating</option>
+                            <option value="id">Sort by ID</option>
+                            <option value="difficulty">Sort by Difficulty</option>
+                        </select>
+                        <button
+                            style={{ marginLeft: 8, fontSize: 14, padding: '6px 10px', borderRadius: 6 }}
+                            onClick={() => setSortConfig(sc => ({ ...sc, direction: sc.direction === 'asc' ? 'desc' : 'asc' }))}
+                        >
+                            {sortConfig.direction === 'asc' ? '▲' : '▼'}
+                        </button>
+                    </div>
+                )}
+                {isMobile ? (
+                    <div>
+                        {currentProblems.map((problem, idx) => (
+                            <div key={problem.id} className={`problem-card${completedProblems.includes(problem.id) ? ' completed-row' : ''}`}>
+                                <h3>
+                                    <a href={problem.url} target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'underline' }}>
+                                        {problem.title}
+                                    </a>
+                                </h3>
+                                <div className="meta">
+                                    <span><b>ID:</b> {problem.id}</span>
+                                    <span style={{ marginLeft: 8 }}><b>Difficulty:</b> <span className={`difficulty-badge difficulty-${problem.difficulty}`}>{problem.difficulty}</span></span>
+                                    <span style={{ marginLeft: 8 }}><b>Rating:</b> {problem.rating || 'N/A'}</span>
+                                </div>
+                                {showTopics && problem.topics.length > 0 && (
+                                    <div className="badges">
+                                        {problem.topics.slice(0, 3).map((topic, index) => (
+                                            <span key={index} className="topic-badge">{topic}</span>
+                                        ))}
+                                    </div>
+                                )}
+                                {problem.companies.length > 0 && (
+                                    <div className="badges">
+                                        {(expandedCompanies[problem.id] ? problem.companies : problem.companies.slice(0, 3)).map((company, index) => (
+                                            <span key={index} className="company-badge">{company}</span>
+                                        ))}
+                                        {problem.companies.length > 3 && !expandedCompanies[problem.id] && (
+                                            <span
+                                                className="company-badge"
+                                                style={{ cursor: 'pointer' }}
+                                                onClick={() => toggleCompanies(problem.id)}
+                                            >
+                                                +{problem.companies.length - 3}
+                                            </span>
+                                        )}
+                                        {problem.companies.length > 3 && expandedCompanies[problem.id] && (
+                                            <span
+                                                className="company-badge"
+                                                style={{ cursor: 'pointer' }}
+                                                onClick={() => toggleCompanies(problem.id)}
+                                            >
+                                                …
+                                            </span>
+                                        )}
+                                    </div>
+                                )}
+                                <button
+                                    onClick={() => toggleCompleted(problem.id)}
+                                    className={`status-btn${completedProblems.includes(problem.id) ? ' completed' : ''}`}
+                                    style={{ marginTop: 8 }}
                                 >
-                                    <td data-label="ID">{problem.id}</td>
-                                    <td data-label="Title">
-                                        <a href={problem.url} target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'underline' }}>
-                                            {problem.title}
-                                        </a>
-                                    </td>
-                                    {showTopics && (
-                                        <td data-label="Topics">
+                                    {completedProblems.includes(problem.id) ? 'Done' : 'Mark Done'}
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="problems-table-container">
+                        <table className="problems-table" style={{ width: '100%', tableLayout: 'fixed' }}>
+                            <thead>
+                                <tr>
+                                    <th onClick={() => setSortConfig(prev => ({ key: 'id', direction: prev.key === 'id' && prev.direction === 'asc' ? 'desc' : 'asc' }))}>
+                                        ID {sortConfig.key === 'id' && (sortConfig.direction === 'asc' ? '▲' : '▼')}
+                                    </th>
+                                    <th>Title</th>
+                                    {showTopics && <th>Topics</th>}
+                                    <th>Companies</th>
+                                    <th onClick={() => setSortConfig(prev => ({ key: 'difficulty', direction: prev.key === 'difficulty' && prev.direction === 'asc' ? 'desc' : 'asc' }))}>
+                                        Difficulty {sortConfig.key === 'difficulty' && (sortConfig.direction === 'asc' ? '▲' : '▼')}
+                                    </th>
+                                    <th
+                                        className={`sortable ${sortConfig.key === 'rating' ? 'sort-active' : ''} ${sortConfig.direction === 'asc' ? 'sort-asc' : ''}`}
+                                        onClick={() => setSortConfig(prev => ({
+                                            key: 'rating',
+                                            direction: prev.key === 'rating' && prev.direction === 'asc' ? 'desc' : 'asc'
+                                        }))}
+                                    >
+                                        Rating <span className="sort-arrow">▲</span>
+                                    </th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {currentProblems.map((problem, idx) => (
+                                    <tr
+                                        key={problem.id}
+                                        className={completedProblems.includes(problem.id) ? 'completed-row' : ''}
+                                    >
+                                        <td data-label="ID">{problem.id}</td>
+                                        <td data-label="Title">
+                                            <a href={problem.url} target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'underline' }}>
+                                                {problem.title}
+                                            </a>
+                                        </td>
+                                        {showTopics && (
+                                            <td data-label="Topics">
+                                                <div>
+                                                    {problem.topics.slice(0, 3).map((topic, index) => (
+                                                        <span key={index} className="topic-badge">{topic}</span>
+                                                    ))}
+                                                </div>
+                                            </td>
+                                        )}
+                                        <td data-label="Companies">
                                             <div>
-                                                {problem.topics.slice(0, 3).map((topic, index) => (
-                                                    <span key={index} className="topic-badge">{topic}</span>
+                                                {(expandedCompanies[problem.id] ? problem.companies : problem.companies.slice(0, 3)).map((company, index) => (
+                                                    <span key={index} className="company-badge">{company}</span>
                                                 ))}
+                                                {problem.companies.length > 3 && !expandedCompanies[problem.id] && (
+                                                    <span
+                                                        className="company-badge"
+                                                        style={{ cursor: 'pointer' }}
+                                                        onClick={() => toggleCompanies(problem.id)}
+                                                    >
+                                                        +{problem.companies.length - 3}
+                                                    </span>
+                                                )}
+                                                {problem.companies.length > 3 && expandedCompanies[problem.id] && (
+                                                    <span
+                                                        className="company-badge"
+                                                        style={{ cursor: 'pointer' }}
+                                                        onClick={() => toggleCompanies(problem.id)}
+                                                    >
+                                                        …
+                                                    </span>
+                                                )}
                                             </div>
                                         </td>
-                                    )}
-                                    <td data-label="Companies">
-                                        <div>
-                                            {(expandedCompanies[problem.id] ? problem.companies : problem.companies.slice(0, 3)).map((company, index) => (
-                                                <span key={index} className="company-badge">{company}</span>
-                                            ))}
-                                            {problem.companies.length > 3 && !expandedCompanies[problem.id] && (
-                                                <span
-                                                    className="company-badge"
-                                                    style={{ cursor: 'pointer' }}
-                                                    onClick={() => toggleCompanies(problem.id)}
-                                                >
-                                                    +{problem.companies.length - 3}
-                                                </span>
-                                            )}
-                                            {problem.companies.length > 3 && expandedCompanies[problem.id] && (
-                                                <span
-                                                    className="company-badge"
-                                                    style={{ cursor: 'pointer' }}
-                                                    onClick={() => toggleCompanies(problem.id)}
-                                                >
-                                                    …
-                                                </span>
-                                            )}
-                                        </div>
-                                    </td>
-                                    <td data-label="Difficulty">
-                                        <span className={`difficulty-badge difficulty-${problem.difficulty}`}>
-                                            {problem.difficulty}
-                                        </span>
-                                    </td>
-                                    <td data-label="Rating">{problem.rating || 'N/A'}</td>
-                                    <td data-label="Status">
-                                        <button
-                                            onClick={() => toggleCompleted(problem.id)}
-                                            className={`status-btn${completedProblems.includes(problem.id) ? ' completed' : ''}`}
-                                        >
-                                            {completedProblems.includes(problem.id) ? 'Done' : 'Mark Done'}
-                                        </button>
-                                    </td>
-
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                                        <td data-label="Difficulty">
+                                            <span className={`difficulty-badge difficulty-${problem.difficulty}`}>
+                                                {problem.difficulty}
+                                            </span>
+                                        </td>
+                                        <td data-label="Rating">{problem.rating || 'N/A'}</td>
+                                        <td data-label="Status">
+                                            <button
+                                                onClick={() => toggleCompleted(problem.id)}
+                                                className={`status-btn${completedProblems.includes(problem.id) ? ' completed' : ''}`}
+                                            >
+                                                {completedProblems.includes(problem.id) ? 'Done' : 'Mark Done'}
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
                 <p className="rating-na-note">
                     * Ratings marked as "N/A" are for older problems and may not have official rating data.
                 </p>
