@@ -313,7 +313,15 @@ const Problems = ({ onLoaded }) => {
                     >
                         {theme === 'dark' ? '🌞' : '🌙'}
                     </button>
-
+                    <button className="help-btn" onClick={() => alert(`
+What is Zerotrac Rating?
+Zerotrac assigns a numeric difficulty rating (1000–3500+) to each LeetCode problem using user submissions and real solve statistics.
+You can think of it as Leetcode contest rating.
+Credits: Ratings sourced from Zerotrac 
+(https://github.com/zerotrac/leetcode_problem_rating)
+`)}>
+                        ❓ Help
+                    </button>
                 </nav>
 
                 { }
