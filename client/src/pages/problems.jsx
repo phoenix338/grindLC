@@ -51,6 +51,9 @@ const Problems = ({ onLoaded }) => {
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [activePage, setActivePage] = useState('home');
 
+    // Get the width of the search input (default or custom):
+    const filterInputWidth = isMobile ? '98vw' : '260px';
+
     useEffect(() => {
         const handleResize = () => {
             setIsMobile(window.innerWidth <= 768);
@@ -409,34 +412,70 @@ const Problems = ({ onLoaded }) => {
                 {/* Topbar */}
                 <div style={{
                     display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    flexDirection: isMobile ? 'column' : 'row',
+                    alignItems: isMobile ? 'stretch' : 'center',
+                    justifyContent: isMobile ? 'flex-start' : 'center',
                     background: 'var(--card-bg)',
                     borderBottom: '1px solid var(--border-color)',
-                    padding: '1.1rem 2.2rem',
+                    padding: isMobile ? '0.7rem 0.7rem 0.2rem 0.7rem' : '1.1rem 2.2rem',
                     position: 'sticky',
                     top: 0,
                     zIndex: 9,
-                    position: 'relative'
+                    position: 'relative',
+                    minHeight: isMobile ? 90 : 60
                 }}>
-                    <div style={{ fontWeight: 800, fontSize: '2rem', color: 'var(--primary)', letterSpacing: '1px', textAlign: 'center', flex: 1 }}>GrindLC</div>
-                    <button
-                        className="theme-toggle-btn"
-                        onClick={() => setTheme(prev => (prev === 'dark' ? 'light' : 'dark'))}
-                        title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-                        style={{ fontSize: '1.7rem', background: 'none', border: 'none', color: 'var(--primary)', padding: 0, cursor: 'pointer', marginLeft: 'auto' }}
-                    >
-                        {theme === 'dark' ? '🌞' : '🌙'}
-                    </button>
-                    <button
-                        className="help-btn"
-                        style={{ marginLeft: 18, fontSize: '1.08rem', background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 7, lineHeight: 1, padding: '0.3em 0.7em', borderRadius: 8 }}
-                        onClick={() => alert(`\nWhat is Zerotrac Rating?\nZerotrac assigns a numeric difficulty rating (1000–3500+) to each LeetCode problem using user submissions and real solve statistics.\nYou can think of it as Leetcode contest rating.\nCredits: Ratings sourced from Zerotrac \n(https://github.com/zerotrac/leetcode_problem_rating)\n`)}
-                        title="What is Zerotrac Rating?"
-                    >
-                        <span style={{ fontSize: '1.35em', display: 'flex', alignItems: 'center', lineHeight: 1 }}>❓</span>
-                        <span style={{ position: 'relative', top: 1 }}>Help</span>
-                    </button>
+                    {/* Desktop: Title center, buttons right; Mobile: stacked */}
+                    {!isMobile && <div style={{ flex: 1, textAlign: 'center', fontWeight: 800, fontSize: '2rem', color: 'var(--primary)', letterSpacing: '1px', minWidth: 0 }}>GrindLC</div>}
+                    {/* Desktop: Title center, buttons right; Mobile: stacked */}
+                    {!isMobile && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, justifyContent: 'flex-end' }}>
+                            <button
+                                className="theme-toggle-btn"
+                                onClick={() => setTheme(prev => (prev === 'dark' ? 'light' : 'dark'))}
+                                title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+                                style={{ fontSize: '1.7rem', background: 'none', border: 'none', color: 'var(--primary)', padding: 0, cursor: 'pointer', minWidth: 36 }}
+                            >
+                                {theme === 'dark' ? '🌞' : '🌙'}
+                            </button>
+                            <button
+                                className="help-btn"
+                                style={{ marginLeft: 0, fontSize: '1.08rem', background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 7, lineHeight: 1, padding: '0.3em 0.7em', borderRadius: 8, minWidth: 60 }}
+                                onClick={() => alert(`\nWhat is Zerotrac Rating?\nZerotrac assigns a numeric difficulty rating (1000–3500+) to each LeetCode problem using user submissions and real solve statistics.\nYou can think of it as Leetcode contest rating.\nCredits: Ratings sourced from Zerotrac \n(https://github.com/zerotrac/leetcode_problem_rating)\n`)}
+                                title="What is Zerotrac Rating?"
+                            >
+                                <span style={{ fontSize: '1.35em', display: 'flex', alignItems: 'center', lineHeight: 1 }}>❓</span>
+                                <span style={{ position: 'relative', top: 1 }}>Help</span>
+                            </button>
+                        </div>
+                    )}
+                    {isMobile && (
+                        <>
+                            <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: 2, marginBottom: 2 }}>
+                                <button
+                                    className="theme-toggle-btn"
+                                    onClick={() => setTheme(prev => (prev === 'dark' ? 'light' : 'dark'))}
+                                    title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+                                    style={{ fontSize: '1.7rem', background: 'none', border: 'none', color: 'var(--primary)', padding: 0, cursor: 'pointer', minWidth: 36 }}
+                                >
+                                    {theme === 'dark' ? '🌞' : '🌙'}
+                                </button>
+                            </div>
+                            <div style={{ width: '100%', textAlign: 'center', marginTop: 2, marginBottom: 2 }}>
+                                <span style={{ fontWeight: 800, fontSize: '1.5rem', color: 'var(--primary)', letterSpacing: '1px', display: 'inline-block' }}>GrindLC</span>
+                            </div>
+                            <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: 4, marginBottom: 2 }}>
+                                <button
+                                    className="help-btn"
+                                    style={{ fontSize: '1.08rem', background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 7, lineHeight: 1, padding: '0.3em 0.7em', borderRadius: 8, minWidth: 60 }}
+                                    onClick={() => alert(`\nWhat is Zerotrac Rating?\nZerotrac assigns a numeric difficulty rating (1000–3500+) to each LeetCode problem using user submissions and real solve statistics.\nYou can think of it as Leetcode contest rating.\nCredits: Ratings sourced from Zerotrac \n(https://github.com/zerotrac/leetcode_problem_rating)\n`)}
+                                    title="What is Zerotrac Rating?"
+                                >
+                                    <span style={{ fontSize: '1.35em', display: 'flex', alignItems: 'center', lineHeight: 1 }}>❓</span>
+                                    <span style={{ position: 'relative', top: 1 }}>Help</span>
+                                </button>
+                            </div>
+                        </>
+                    )}
                 </div>
                 {/* Main Content Switcher */}
                 {activePage === 'home' ? (
@@ -450,20 +489,21 @@ const Problems = ({ onLoaded }) => {
                                         placeholder="Search problems..."
                                         value={search}
                                         onChange={(e) => setSearch(e.target.value)}
+                                        style={{ width: filterInputWidth, maxWidth: filterInputWidth, minWidth: 0, marginRight: isMobile ? 8 : 0 }}
                                     />
-                                    <select value={companyFilter} onChange={(e) => setCompanyFilter(e.target.value)} className="compact-filter">
+                                    <select value={companyFilter} onChange={(e) => setCompanyFilter(e.target.value)} className="compact-filter" style={{ width: filterInputWidth, maxWidth: filterInputWidth, minWidth: 0, marginRight: isMobile ? 8 : 0, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
                                         <option value="">All Companies</option>
                                         {allCompanies.map((company) => (
                                             <option key={company} value={company}>{company}</option>
                                         ))}
                                     </select>
-                                    <select value={difficultyFilter} onChange={(e) => setDifficultyFilter(e.target.value)} className="compact-filter">
+                                    <select value={difficultyFilter} onChange={(e) => setDifficultyFilter(e.target.value)} className="compact-filter" style={{ width: filterInputWidth, maxWidth: filterInputWidth, minWidth: 0, marginRight: isMobile ? 8 : 0, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
                                         <option value="">All Difficulties</option>
                                         {allDifficulties.map((diff) => (
                                             <option key={diff} value={diff}>{diff.charAt(0).toUpperCase() + diff.slice(1)}</option>
                                         ))}
                                     </select>
-                                    <select value={topicFilter} onChange={(e) => setTopicFilter(e.target.value)} className="compact-filter">
+                                    <select value={topicFilter} onChange={(e) => setTopicFilter(e.target.value)} className="compact-filter" style={{ width: filterInputWidth, maxWidth: filterInputWidth, minWidth: 0, marginRight: isMobile ? 8 : 0, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
                                         <option value="">All Topics</option>
                                         {allTopics.map((topic) => (
                                             <option key={topic} value={topic}>{topic}</option>
@@ -705,6 +745,7 @@ const Problems = ({ onLoaded }) => {
                         problems={problems}
                         completedProblems={completedProblems}
                         theme={theme}
+                        isMobile={isMobile}
                     />
                 )}
             </div>
@@ -748,7 +789,7 @@ export const VisitCounter = () => {
     );
 };
 
-function Dashboard({ problems, completedProblems, theme }) {
+function Dashboard({ problems, completedProblems, theme, isMobile }) {
     // Calculate stats
     const solvedSet = new Set(completedProblems.map(String));
     const solvedProblems = problems.filter(p => solvedSet.has(String(p.id)));
@@ -778,51 +819,121 @@ function Dashboard({ problems, completedProblems, theme }) {
             }
         });
     });
+    const streak = 0; // Implement streak calculation
+    const longestStreak = 0; // Implement longest streak calculation
     return (
-        <div style={{ padding: '2.5rem 1.5rem', maxWidth: 1100, margin: '0 auto' }}>
+        <div style={{ padding: isMobile ? '1.2rem 0.3rem' : '2.5rem 1.5rem', maxWidth: 1100, margin: '0 auto' }}>
+            {streak > 0 || longestStreak > 0 && (
+                <div
+                    style={{
+                        background: 'linear-gradient(90deg, #fbbf24 0%, #f87171 100%)',
+                        color: '#fff',
+                        borderRadius: 18,
+                        boxShadow: '0 2px 12px rgba(0,0,0,0.09)',
+                        padding: isMobile ? '1.1rem 0.7rem' : '1.2rem 2rem',
+                        margin: isMobile ? '0 auto 1.2rem auto' : '0 auto 2.2rem auto',
+                        maxWidth: isMobile ? 340 : 500,
+                        display: 'flex',
+                        flexDirection: isMobile ? 'column' : 'row',
+                        alignItems: 'center',
+                        gap: isMobile ? 8 : 18,
+                        fontFamily: 'inherit',
+                        justifyContent: 'center',
+                        flexWrap: 'wrap',
+                        textAlign: isMobile ? 'center' : 'left',
+                    }}
+                >
+                    <span style={{ fontSize: isMobile ? 28 : 32, marginRight: isMobile ? 0 : 8, lineHeight: 1, marginBottom: isMobile ? 6 : 0 }}>🔥</span>
+                    <div style={{ fontWeight: 700, fontSize: isMobile ? 17 : 20, letterSpacing: 0.5, marginBottom: isMobile ? 2 : 0 }}>
+                        {streak > 0 ? `Current streak: ${streak} day${streak > 1 ? 's' : ''}` : 'No current streak'}
+                    </div>
+                    <div style={{ fontSize: isMobile ? 15 : 16, fontWeight: 500, marginLeft: isMobile ? 0 : 18 }}>
+                        {longestStreak > 0 ? `Longest streak: ${longestStreak} day${longestStreak > 1 ? 's' : ''}` : ''}
+                    </div>
+                </div>
+            )}
             <h2 style={{ fontSize: '2.2rem', fontWeight: 800, color: 'var(--primary)', marginBottom: '2.2rem', textAlign: 'center', letterSpacing: '1px' }}>Progress Dashboard</h2>
 
-            <div style={{ display: 'flex', gap: 36, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 48 }}>
+            <div
+                style={{
+                    display: 'grid',
+                    gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)',
+                    gap: isMobile ? 18 : 36,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginBottom: 48,
+                    maxWidth: isMobile ? '100vw' : undefined,
+                    boxSizing: 'border-box',
+                    marginLeft: 'auto',
+                    marginRight: 'auto',
+                }}
+            >
                 {/* Circle Stat Cards */}
-                <CircleStat label="Total" value={`${totalSolved}/${totalProblems}`} color="var(--primary)" theme={theme} />
-                <CircleStat label="Easy" value={`${diffStats.easy}/${diffTotals.easy}`} color="#22c55e" theme={theme} />
-                <CircleStat label="Medium" value={`${diffStats.medium}/${diffTotals.medium}`} color="#f59e0b" theme={theme} />
-                <CircleStat label="Hard" value={`${diffStats.hard}/${diffTotals.hard}`} color="#ef4444" theme={theme} />
+                <CircleStat label="Total" value={`${totalSolved}/${totalProblems}`} color="var(--primary)" theme={theme} isMobile={isMobile} />
+                <CircleStat label="Easy" value={`${diffStats.easy}/${diffTotals.easy}`} color="#22c55e" theme={theme} isMobile={isMobile} />
+                <CircleStat label="Medium" value={`${diffStats.medium}/${diffTotals.medium}`} color="#f59e0b" theme={theme} isMobile={isMobile} />
+                <CircleStat label="Hard" value={`${diffStats.hard}/${diffTotals.hard}`} color="#ef4444" theme={theme} isMobile={isMobile} />
             </div>
             <div style={{ background: 'var(--card-bg)', borderRadius: 18, boxShadow: '0 2px 12px rgba(0,0,0,0.07)', padding: '2rem 2.5rem', margin: '0 auto', maxWidth: 900 }}>
-                <h3 style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--primary)', marginBottom: 18 }}>Per-Topic Progress</h3>
+                <h3 style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--primary)', marginBottom: 18, textAlign: 'center' }}>Per-Topic Progress</h3>
                 <div style={{ marginTop: 18, color: '#888', fontSize: 14, textAlign: 'center', marginBottom: 18 }}>
                     Note: Avg. Rating is calculated only from the problems you have marked as done for each topic.
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 24 }}>
-                    {allTopics.length === 0 && (
-                        <div style={{ color: '#888', textAlign: 'center', gridColumn: '1/-1' }}>No topics found.</div>
-                    )}
-                    {allTopics.map(topic => {
-                        const stat = topicStats[topic] || { count: 0, ratingSum: 0, ratingCount: 0, total: 0 };
-                        return (
-                            <div key={topic} style={{ background: '#f8fafc', borderRadius: 14, boxShadow: '0 1px 6px rgba(0,0,0,0.04)', padding: '1.2rem 1.1rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                <div style={{ fontWeight: 700, fontSize: 18, color: 'var(--primary)', marginBottom: 6 }}>{topic}</div>
-                                <div style={{ fontSize: 15, color: '#555', marginBottom: 4 }}>Solved: <b>{stat.count}/{stat.total}</b></div>
-                                <div style={{ fontSize: 15, color: '#555' }}>Avg. Rating: <b>{stat.ratingCount > 0 ? (stat.ratingSum / stat.ratingCount).toFixed(1) : 'N/A'}</b></div>
-                            </div>
-                        );
-                    })}
+                <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(210px, 1fr))',
+                        gap: isMobile ? 12 : 24,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        margin: '0 auto',
+                        maxWidth: isMobile ? '100%' : 700,
+                        marginTop: 0,
+                    }}>
+                        {allTopics.length === 0 && (
+                            <div style={{ color: '#888', textAlign: 'center', gridColumn: '1/-1' }}>No topics found.</div>
+                        )}
+                        {allTopics.map(topic => {
+                            const stat = topicStats[topic] || { count: 0, ratingSum: 0, ratingCount: 0, total: 0 };
+                            return (
+                                <div key={topic} style={{
+                                    background: '#f8fafc',
+                                    borderRadius: 14,
+                                    boxShadow: '0 1px 6px rgba(0,0,0,0.04)',
+                                    padding: isMobile ? '0.7rem 0.6rem' : '1.2rem 1.1rem',
+                                    textAlign: 'center',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    marginBottom: isMobile ? 10 : 0,
+                                    fontSize: isMobile ? 13 : 15,
+                                    minWidth: 0,
+                                }}>
+                                    <div style={{ fontWeight: 700, fontSize: isMobile ? 15 : 18, color: 'var(--primary)', marginBottom: 4 }}>{topic}</div>
+                                    <div style={{ fontSize: isMobile ? 12 : 15, color: '#555', marginBottom: 2 }}>Solved: <b>{stat.count}/{stat.total}</b></div>
+                                    <div style={{ fontSize: isMobile ? 12 : 15, color: '#555' }}>Avg. Rating: <b>{stat.ratingCount > 0 ? (stat.ratingSum / stat.ratingCount).toFixed(1) : 'N/A'}</b></div>
+                                </div>
+                            );
+                        })}
+                    </div>
                 </div>
-
             </div>
         </div>
     );
 }
 
 // CircleStat component
-function CircleStat({ label, value, color, theme }) {
+function CircleStat({ label, value, color, theme, isMobile }) {
     const [solved, total] = value.split('/');
+    const size = isMobile ? 80 : 120;
+    const fontSizeMain = isMobile ? 22 : 32;
+    const fontSizeSub = isMobile ? 13 : 18;
+    const fontSizeLabel = isMobile ? 13 : 17;
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 140 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: size }}>
             <div style={{
-                width: 120,
-                height: 120,
+                width: size,
+                height: size,
                 borderRadius: '50%',
                 background: theme === 'dark' ? '#232b3a' : '#fff',
                 border: `4px solid ${color}`,
@@ -832,16 +943,16 @@ function CircleStat({ label, value, color, theme }) {
                 justifyContent: 'center',
                 color,
                 boxShadow: '0 2px 10px rgba(0,0,0,0.07)',
-                marginBottom: 16,
-                padding: '0 10px',
+                marginBottom: isMobile ? 10 : 16,
+                padding: '0 6px',
                 boxSizing: 'border-box',
                 overflow: 'hidden',
             }}>
-                <div style={{ fontWeight: 800, fontSize: 32, lineHeight: 1 }}>{solved}</div>
-                <div style={{ width: 36, height: 2, background: color, borderRadius: 2, margin: '6px 0' }} />
-                <div style={{ fontWeight: 600, fontSize: 18, color: color + 'bb', lineHeight: 1 }}>{total}</div>
+                <div style={{ fontWeight: 800, fontSize: fontSizeMain, lineHeight: 1 }}>{solved}</div>
+                <div style={{ width: isMobile ? 22 : 36, height: 2, background: color, borderRadius: 2, margin: isMobile ? '4px 0' : '6px 0' }} />
+                <div style={{ fontWeight: 600, fontSize: fontSizeSub, color: color + 'bb', lineHeight: 1 }}>{total}</div>
             </div>
-            <div style={{ fontSize: 17, color: color, fontWeight: 700 }}>{label}</div>
+            <div style={{ fontSize: fontSizeLabel, color: color, fontWeight: 700 }}>{label}</div>
         </div>
     );
 }
