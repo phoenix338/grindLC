@@ -286,9 +286,13 @@ const Problems = ({ onLoaded }) => {
         }));
     };
 
-    // Sidebar collapsed state: always collapsed on mobile
+    // Sidebar collapsed state: always collapsed on mobile, always expanded on desktop by default
     useEffect(() => {
-        if (isMobile) setSidebarCollapsed(true);
+        if (isMobile) {
+            setSidebarCollapsed(true);
+        } else {
+            setSidebarCollapsed(false);
+        }
     }, [isMobile]);
 
     if (loading) {
