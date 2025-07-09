@@ -48,7 +48,7 @@ const Problems = ({ onLoaded }) => {
     const [theme, setTheme] = useState(() => {
         return localStorage.getItem('theme') || 'light';
     });
-    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
     const [activePage, setActivePage] = useState('home');
 
     // Get the width of the search input (default or custom):
@@ -286,6 +286,11 @@ const Problems = ({ onLoaded }) => {
         }));
     };
 
+    // Sidebar collapsed state: always collapsed on mobile
+    useEffect(() => {
+        if (isMobile) setSidebarCollapsed(true);
+    }, [isMobile]);
+
     if (loading) {
         return (
             <div className="problems-container">
@@ -310,7 +315,7 @@ const Problems = ({ onLoaded }) => {
         <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--background)' }}>
             {/* Sidebar */}
             <aside style={{
-                width: sidebarCollapsed ? '60px' : '200px',
+                width: isMobile || sidebarCollapsed ? '60px' : '200px',
                 background: theme === 'dark'
                     ? 'linear-gradient(180deg, #1e293b 0%, #334155 100%)'
                     : 'linear-gradient(180deg, var(--primary) 0%, var(--primary-hover) 100%)',
@@ -327,7 +332,7 @@ const Problems = ({ onLoaded }) => {
             }}>
                 {/* Collapse/Expand Button */}
                 <button
-                    onClick={() => setSidebarCollapsed(c => !c)}
+                    onClick={() => !isMobile && setSidebarCollapsed(c => !c)}
                     style={{
                         position: 'absolute',
                         top: 18,
@@ -340,12 +345,14 @@ const Problems = ({ onLoaded }) => {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        cursor: 'pointer',
+                        cursor: isMobile ? 'not-allowed' : 'pointer',
                         boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
                         zIndex: 20,
                         transition: 'left 0.2s',
+                        opacity: isMobile ? 0.5 : 1
                     }}
                     title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                    disabled={isMobile}
                 >
                     {sidebarCollapsed ? <ChevronRight /> : <ChevronLeft />}
                 </button>
