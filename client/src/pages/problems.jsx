@@ -404,7 +404,10 @@ Credits: Ratings sourced from Zerotrac
                         {currentProblems.map((problem, idx) => (
                             <div key={problem.id} className={`problem-card${completedProblems.includes(problem.id) ? ' completed-row' : ''}`}>
                                 <h3>
-                                    <a href={problem.url} target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'underline' }}>
+                                    <a href={problem.url} target="_blank" rel="noopener noreferrer" style={{
+                                        color: 'var(--title-color)',
+                                        textDecoration: 'none'
+                                    }}>
                                         {problem.title}
                                     </a>
                                 </h3>
@@ -458,6 +461,15 @@ Credits: Ratings sourced from Zerotrac
                 ) : (
                     <div className="problems-table-container">
                         <table className="problems-table" style={{ width: '100%', tableLayout: 'fixed' }}>
+                            <colgroup>
+                                <col style={{ width: '6%' }} />
+                                <col style={{ width: '35%' }} />
+                                {showTopics && <col style={{ width: '22%' }} />}
+                                <col style={{ width: '20%' }} />
+                                <col style={{ width: '10%' }} />
+                                <col style={{ width: '10%' }} />
+                                <col style={{ width: '10%' }} />
+                            </colgroup>
                             <thead>
                                 <tr>
                                     <th onClick={() => setSortConfig(prev => ({ key: 'id', direction: prev.key === 'id' && prev.direction === 'asc' ? 'desc' : 'asc' }))}>
@@ -489,7 +501,11 @@ Credits: Ratings sourced from Zerotrac
                                     >
                                         <td data-label="ID">{problem.id}</td>
                                         <td data-label="Title">
-                                            <a href={problem.url} target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'underline' }}>
+                                            <a href={problem.url} target="_blank" rel="noopener noreferrer" style={{
+                                                color: '#2563eb',
+                                                textDecoration: 'none',
+                                                color: 'var(--title-color)'
+                                            }}>
                                                 {problem.title}
                                             </a>
                                         </td>
