@@ -428,6 +428,15 @@ const Problems = ({ onLoaded }) => {
                     >
                         {theme === 'dark' ? '🌞' : '🌙'}
                     </button>
+                    <button
+                        className="help-btn"
+                        style={{ marginLeft: 18, fontSize: '1.08rem', background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 7, lineHeight: 1, padding: '0.3em 0.7em', borderRadius: 8 }}
+                        onClick={() => alert(`\nWhat is Zerotrac Rating?\nZerotrac assigns a numeric difficulty rating (1000–3500+) to each LeetCode problem using user submissions and real solve statistics.\nYou can think of it as Leetcode contest rating.\nCredits: Ratings sourced from Zerotrac \n(https://github.com/zerotrac/leetcode_problem_rating)\n`)}
+                        title="What is Zerotrac Rating?"
+                    >
+                        <span style={{ fontSize: '1.35em', display: 'flex', alignItems: 'center', lineHeight: 1 }}>❓</span>
+                        <span style={{ position: 'relative', top: 1 }}>Help</span>
+                    </button>
                 </div>
                 {/* Main Content Switcher */}
                 {activePage === 'home' ? (
@@ -772,7 +781,7 @@ function Dashboard({ problems, completedProblems, theme }) {
     return (
         <div style={{ padding: '2.5rem 1.5rem', maxWidth: 1100, margin: '0 auto' }}>
             <h2 style={{ fontSize: '2.2rem', fontWeight: 800, color: 'var(--primary)', marginBottom: '2.2rem', textAlign: 'center', letterSpacing: '1px' }}>Progress Dashboard</h2>
-            
+
             <div style={{ display: 'flex', gap: 36, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 48 }}>
                 {/* Circle Stat Cards */}
                 <CircleStat label="Total" value={`${totalSolved}/${totalProblems}`} color="var(--primary)" theme={theme} />
@@ -782,7 +791,7 @@ function Dashboard({ problems, completedProblems, theme }) {
             </div>
             <div style={{ background: 'var(--card-bg)', borderRadius: 18, boxShadow: '0 2px 12px rgba(0,0,0,0.07)', padding: '2rem 2.5rem', margin: '0 auto', maxWidth: 900 }}>
                 <h3 style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--primary)', marginBottom: 18 }}>Per-Topic Progress</h3>
-                <div style={{ marginTop: 18, color: '#888', fontSize: 14, textAlign: 'center' ,marginBottom:18}}>
+                <div style={{ marginTop: 18, color: '#888', fontSize: 14, textAlign: 'center', marginBottom: 18 }}>
                     Note: Avg. Rating is calculated only from the problems you have marked as done for each topic.
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 24 }}>
