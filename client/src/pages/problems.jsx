@@ -2,6 +2,24 @@ import { useState, useEffect } from 'react';
 import { fetchProblems } from '../api/problems';
 import '../styles.css';
 
+// SVGs for sidebar
+const ChevronLeft = () => (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 15L9 10L13 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+);
+const ChevronRight = () => (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 5L11 10L7 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+);
+const HomeIcon = () => (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 4l9 5.5" /><path d="M4 10v10a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-4h4v4a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1V10" /></svg>
+);
+const ProgressIcon = () => (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="12" width="4" height="8" rx="1" />
+        <rect x="10" y="8" width="4" height="12" rx="1" />
+        <rect x="17" y="4" width="4" height="16" rx="1" />
+    </svg>
+);
+
 const unique = (arr) => Array.from(new Set(arr.filter(Boolean)));
 
 const Problems = ({ onLoaded }) => {
@@ -30,6 +48,8 @@ const Problems = ({ onLoaded }) => {
     const [theme, setTheme] = useState(() => {
         return localStorage.getItem('theme') || 'light';
     });
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+    const [activePage, setActivePage] = useState('home');
 
     useEffect(() => {
         const handleResize = () => {
@@ -284,336 +304,406 @@ const Problems = ({ onLoaded }) => {
     }
 
     return (
-        <div className="problems-container">
-            <div className="problems-inner">
-                { }
-                <nav className="navbar">
-                    <div className="navbar-title">
-                        GrindLC
-
-                        <span className="navbar-progress">
-                            {stats.completed} / {stats.total} solved
-                        </span>
-                    </div>
-                    <div className="navbar-diff">
-                        <span className="diff-easy">
-                            Easy: {difficultyStats.easy.completed}/{difficultyStats.easy.total}
-                        </span>
-                        <span className="diff-medium">
-                            Medium: {difficultyStats.medium.completed}/{difficultyStats.medium.total}
-                        </span>
-                        <span className="diff-hard">
-                            Hard: {difficultyStats.hard.completed}/{difficultyStats.hard.total}
-                        </span>
-                    </div>
+        <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--background)' }}>
+            {/* Sidebar */}
+            <aside style={{
+                width: sidebarCollapsed ? '60px' : '200px',
+                background: theme === 'dark'
+                    ? 'linear-gradient(180deg, #1e293b 0%, #334155 100%)'
+                    : 'linear-gradient(180deg, var(--primary) 0%, var(--primary-hover) 100%)',
+                boxShadow: '2px 0 16px 0 rgba(0,0,0,0.07)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                padding: '2.5rem 0 1.5rem 0',
+                minHeight: '100vh',
+                position: 'sticky',
+                top: 0,
+                zIndex: 10,
+                transition: 'width 0.2s cubic-bezier(.4,2,.6,1)',
+            }}>
+                {/* Collapse/Expand Button */}
+                <button
+                    onClick={() => setSidebarCollapsed(c => !c)}
+                    style={{
+                        position: 'absolute',
+                        top: 18,
+                        left: sidebarCollapsed ? 10 : 18,
+                        background: 'rgba(255,255,255,0.7)',
+                        border: 'none',
+                        borderRadius: '50%',
+                        width: 28,
+                        height: 28,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+                        zIndex: 20,
+                        transition: 'left 0.2s',
+                    }}
+                    title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                >
+                    {sidebarCollapsed ? <ChevronRight /> : <ChevronLeft />}
+                </button>
+                <div style={{ height: '2.5rem', marginBottom: '2.5rem' }}></div>
+                <nav style={{ width: '100%' }}>
+                    <button
+                        style={{
+                            width: sidebarCollapsed ? 44 : '85%',
+                            margin: '0.7rem auto',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
+                            gap: sidebarCollapsed ? 0 : 14,
+                            padding: sidebarCollapsed ? '0.9rem 0' : '0.9rem 1.2rem',
+                            borderRadius: '999px',
+                            border: 'none',
+                            background: '#fff',
+                            color: 'var(--primary)',
+                            fontWeight: 700,
+                            fontSize: '1.08rem',
+                            cursor: 'pointer',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
+                            transition: 'background 0.2s, color 0.2s, width 0.2s',
+                            ...(activePage === 'home' ? { background: 'var(--primary)', color: '#fff' } : {})
+                        }}
+                        onClick={() => setActivePage('home')}
+                        onMouseOver={e => { e.currentTarget.style.background = 'var(--primary-hover)'; e.currentTarget.style.color = '#fff'; }}
+                        onMouseOut={e => { if (activePage === 'home') { e.currentTarget.style.background = 'var(--primary)'; e.currentTarget.style.color = '#fff'; } else { e.currentTarget.style.background = '#fff'; e.currentTarget.style.color = 'var(--primary)'; } }}
+                    >
+                        <HomeIcon />
+                        {!sidebarCollapsed && <span>Home</span>}
+                    </button>
+                    <button
+                        style={{
+                            width: sidebarCollapsed ? 44 : '85%',
+                            margin: '0.7rem auto',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: sidebarCollapsed ? 'center' : 'flex-start',
+                            gap: sidebarCollapsed ? 0 : 14,
+                            padding: sidebarCollapsed ? '0.9rem 0' : '0.9rem 1.2rem',
+                            borderRadius: '999px',
+                            border: 'none',
+                            background: '#fff',
+                            color: 'var(--primary)',
+                            fontWeight: 700,
+                            fontSize: '1.08rem',
+                            cursor: 'pointer',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
+                            transition: 'background 0.2s, color 0.2s, width 0.2s',
+                            ...(activePage === 'progress' ? { background: 'var(--primary)', color: '#fff' } : {})
+                        }}
+                        onClick={() => setActivePage('progress')}
+                        onMouseOver={e => { e.currentTarget.style.background = 'var(--primary-hover)'; e.currentTarget.style.color = '#fff'; }}
+                        onMouseOut={e => { if (activePage === 'progress') { e.currentTarget.style.background = 'var(--primary)'; e.currentTarget.style.color = '#fff'; } else { e.currentTarget.style.background = '#fff'; e.currentTarget.style.color = 'var(--primary)'; } }}
+                    >
+                        <ProgressIcon />
+                        {!sidebarCollapsed && <span>Progress</span>}
+                    </button>
+                </nav>
+            </aside>
+            {/* Main Content */}
+            <div style={{ flex: 1, minWidth: 0 }}>
+                {/* Topbar */}
+                <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'var(--card-bg)',
+                    borderBottom: '1px solid var(--border-color)',
+                    padding: '1.1rem 2.2rem',
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 9,
+                    position: 'relative'
+                }}>
+                    <div style={{ fontWeight: 800, fontSize: '2rem', color: 'var(--primary)', letterSpacing: '1px', textAlign: 'center', flex: 1 }}>GrindLC</div>
                     <button
                         className="theme-toggle-btn"
                         onClick={() => setTheme(prev => (prev === 'dark' ? 'light' : 'dark'))}
                         title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+                        style={{ fontSize: '1.7rem', background: 'none', border: 'none', color: 'var(--primary)', padding: 0, cursor: 'pointer', marginLeft: 'auto' }}
                     >
                         {theme === 'dark' ? '🌞' : '🌙'}
                     </button>
-                    <button className="help-btn" onClick={() => alert(`
-What is Zerotrac Rating?
-Zerotrac assigns a numeric difficulty rating (1000–3500+) to each LeetCode problem using user submissions and real solve statistics.
-You can think of it as Leetcode contest rating.
-Credits: Ratings sourced from Zerotrac 
-(https://github.com/zerotrac/leetcode_problem_rating)
-`)}>
-                        ❓ Help
-                    </button>
-                </nav>
-
-                { }
-                <div className="filters-section">
-                    <div className="filters-top">
-                        <input
-                            type="text"
-                            className="compact-filter"
-                            placeholder="Search problems..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                        />
-                        <select value={companyFilter} onChange={(e) => setCompanyFilter(e.target.value)} className="compact-filter">
-                            <option value="">All Companies</option>
-                            {allCompanies.map((company) => (
-                                <option key={company} value={company}>{company}</option>
-                            ))}
-                        </select>
-                        <select value={difficultyFilter} onChange={(e) => setDifficultyFilter(e.target.value)} className="compact-filter">
-                            <option value="">All Difficulties</option>
-                            {allDifficulties.map((diff) => (
-                                <option key={diff} value={diff}>{diff.charAt(0).toUpperCase() + diff.slice(1)}</option>
-                            ))}
-                        </select>
-                        <select value={topicFilter} onChange={(e) => setTopicFilter(e.target.value)} className="compact-filter">
-                            <option value="">All Topics</option>
-                            {allTopics.map((topic) => (
-                                <option key={topic} value={topic}>{topic}</option>
-                            ))}
-                        </select>
-                        <div className="rating-input-group compact-filter">
-                            <input
-                                type="number"
-                                placeholder="Min Rating"
-                                value={ratingRange.min}
-                                onChange={(e) => setRatingRange((prev) => ({ ...prev, min: e.target.value }))}
-                            />
-                            <input
-                                type="number"
-                                placeholder="Max Rating"
-                                value={ratingRange.max}
-                                onChange={(e) => setRatingRange((prev) => ({ ...prev, max: e.target.value }))}
-                            />
-                        </div>
-                    </div>
-                    <div className="filters-bottom">
-                        <button onClick={() => setShowTopics(!showTopics)}>
-                            {showTopics ? 'Hide Topics' : 'Show Topics'}
-                        </button>
-                        <button onClick={resetFilters}>Reset All</button>
-                    </div>
                 </div>
-
-
-
-                { }
-
-                { }
-                {isMobile && (
-                    <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'flex-end' }}>
-                        <select
-                            value={sortConfig.key}
-                            onChange={e => setSortConfig({ key: e.target.value, direction: sortConfig.direction })}
-                            style={{ fontSize: 14, padding: '6px 10px', borderRadius: 6 }}
-                        >
-                            <option value="rating">Sort by Rating</option>
-                            <option value="id">Sort by ID</option>
-                            <option value="difficulty">Sort by Difficulty</option>
-                        </select>
-                        <button
-                            style={{ marginLeft: 8, fontSize: 14, padding: '6px 10px', borderRadius: 6 }}
-                            onClick={() => setSortConfig(sc => ({ ...sc, direction: sc.direction === 'asc' ? 'desc' : 'asc' }))}
-                        >
-                            {sortConfig.direction === 'asc' ? '▲' : '▼'}
-                        </button>
-                    </div>
-                )}
-                {isMobile ? (
-                    <div>
-                        {currentProblems.map((problem, idx) => (
-                            <div key={problem.id} className={`problem-card${completedProblems.includes(problem.id) ? ' completed-row' : ''}`}>
-                                <h3>
-                                    <a href={problem.url} target="_blank" rel="noopener noreferrer" style={{
-                                        color: 'var(--title-color)',
-                                        textDecoration: 'none'
-                                    }}>
-                                        {problem.title}
-                                    </a>
-                                </h3>
-                                <div className="meta">
-                                    <span><b>ID:</b> {problem.id}</span>
-                                    <span style={{ marginLeft: 8 }}><b>Difficulty:</b> <span className={`difficulty-badge difficulty-${problem.difficulty}`}>{problem.difficulty}</span></span>
-                                    <span style={{ marginLeft: 8 }}><b>Rating:</b> {problem.rating || 'N/A'}</span>
+                {/* Main Content Switcher */}
+                {activePage === 'home' ? (
+                    <div className="problems-container">
+                        <div className="problems-inner">
+                            <div className="filters-section">
+                                <div className="filters-top">
+                                    <input
+                                        type="text"
+                                        className="compact-filter"
+                                        placeholder="Search problems..."
+                                        value={search}
+                                        onChange={(e) => setSearch(e.target.value)}
+                                    />
+                                    <select value={companyFilter} onChange={(e) => setCompanyFilter(e.target.value)} className="compact-filter">
+                                        <option value="">All Companies</option>
+                                        {allCompanies.map((company) => (
+                                            <option key={company} value={company}>{company}</option>
+                                        ))}
+                                    </select>
+                                    <select value={difficultyFilter} onChange={(e) => setDifficultyFilter(e.target.value)} className="compact-filter">
+                                        <option value="">All Difficulties</option>
+                                        {allDifficulties.map((diff) => (
+                                            <option key={diff} value={diff}>{diff.charAt(0).toUpperCase() + diff.slice(1)}</option>
+                                        ))}
+                                    </select>
+                                    <select value={topicFilter} onChange={(e) => setTopicFilter(e.target.value)} className="compact-filter">
+                                        <option value="">All Topics</option>
+                                        {allTopics.map((topic) => (
+                                            <option key={topic} value={topic}>{topic}</option>
+                                        ))}
+                                    </select>
+                                    <div className="rating-input-group compact-filter">
+                                        <input
+                                            type="number"
+                                            placeholder="Min Rating"
+                                            value={ratingRange.min}
+                                            onChange={(e) => setRatingRange((prev) => ({ ...prev, min: e.target.value }))}
+                                        />
+                                        <input
+                                            type="number"
+                                            placeholder="Max Rating"
+                                            value={ratingRange.max}
+                                            onChange={(e) => setRatingRange((prev) => ({ ...prev, max: e.target.value }))}
+                                        />
+                                    </div>
                                 </div>
-                                {showTopics && problem.topics.length > 0 && (
-                                    <div className="badges">
-                                        {problem.topics.slice(0, 3).map((topic, index) => (
-                                            <span key={index} className="topic-badge">{topic}</span>
-                                        ))}
-                                    </div>
-                                )}
-                                {problem.companies.length > 0 && (
-                                    <div className="badges">
-                                        {(expandedCompanies[problem.id] ? problem.companies : problem.companies.slice(0, 3)).map((company, index) => (
-                                            <span key={index} className="company-badge">{company}</span>
-                                        ))}
-                                        {problem.companies.length > 3 && !expandedCompanies[problem.id] && (
-                                            <span
-                                                className="company-badge"
-                                                style={{ cursor: 'pointer' }}
-                                                onClick={() => toggleCompanies(problem.id)}
-                                            >
-                                                +{problem.companies.length - 3}
-                                            </span>
-                                        )}
-                                        {problem.companies.length > 3 && expandedCompanies[problem.id] && (
-                                            <span
-                                                className="company-badge"
-                                                style={{ cursor: 'pointer' }}
-                                                onClick={() => toggleCompanies(problem.id)}
-                                            >
-                                                …
-                                            </span>
-                                        )}
-                                    </div>
-                                )}
-                                <button
-                                    onClick={() => toggleCompleted(problem.id)}
-                                    className={`status-btn${completedProblems.includes(problem.id) ? ' completed' : ''}`}
-                                    style={{ marginTop: 8 }}
-                                >
-                                    {completedProblems.includes(problem.id) ? 'Done' : 'Mark Done'}
-                                </button>
+                                <div className="filters-bottom">
+                                    <button onClick={() => setShowTopics(!showTopics)}>
+                                        {showTopics ? 'Hide Topics' : 'Show Topics'}
+                                    </button>
+                                    <button onClick={resetFilters}>Reset All</button>
+                                </div>
                             </div>
-                        ))}
-                    </div>
-                ) : (
-                    <div className="problems-table-container">
-                        <table className="problems-table" style={{ width: '100%', tableLayout: 'fixed' }}>
-                            <colgroup>
-                                <col style={{ width: '6%' }} />
-                                <col style={{ width: '35%' }} />
-                                {showTopics && <col style={{ width: '22%' }} />}
-                                <col style={{ width: '20%' }} />
-                                <col style={{ width: '10%' }} />
-                                <col style={{ width: '10%' }} />
-                                <col style={{ width: '10%' }} />
-                            </colgroup>
-                            <thead>
-                                <tr>
-                                    <th onClick={() => setSortConfig(prev => ({ key: 'id', direction: prev.key === 'id' && prev.direction === 'asc' ? 'desc' : 'asc' }))}>
-                                        ID {sortConfig.key === 'id' && (sortConfig.direction === 'asc' ? '▲' : '▼')}
-                                    </th>
-                                    <th>Title</th>
-                                    {showTopics && <th>Topics</th>}
-                                    <th>Companies</th>
-                                    <th onClick={() => setSortConfig(prev => ({ key: 'difficulty', direction: prev.key === 'difficulty' && prev.direction === 'asc' ? 'desc' : 'asc' }))}>
-                                        Difficulty {sortConfig.key === 'difficulty' && (sortConfig.direction === 'asc' ? '▲' : '▼')}
-                                    </th>
-                                    <th
-                                        className={`sortable ${sortConfig.key === 'rating' ? 'sort-active' : ''} ${sortConfig.direction === 'asc' ? 'sort-asc' : ''}`}
-                                        onClick={() => setSortConfig(prev => ({
-                                            key: 'rating',
-                                            direction: prev.key === 'rating' && prev.direction === 'asc' ? 'desc' : 'asc'
-                                        }))}
-                                    >
-                                        Rating <span className="sort-arrow">▲</span>
-                                    </th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {currentProblems.map((problem, idx) => (
-                                    <tr
-                                        key={problem.id}
-                                        className={completedProblems.includes(problem.id) ? 'completed-row' : ''}
-                                    >
-                                        <td data-label="ID">{problem.id}</td>
-                                        <td data-label="Title">
-                                            <a href={problem.url} target="_blank" rel="noopener noreferrer" style={{
-                                                color: '#2563eb',
-                                                textDecoration: 'none',
-                                                color: 'var(--title-color)'
-                                            }}>
-                                                {problem.title}
-                                            </a>
-                                        </td>
-                                        {showTopics && (
-                                            <td data-label="Topics">
-                                                <div>
+
+                            {isMobile ? (
+                                <div>
+                                    {currentProblems.map((problem, idx) => (
+                                        <div key={problem.id} className={`problem-card${completedProblems.includes(problem.id) ? ' completed-row' : ''}`}>
+                                            <h3>
+                                                <a href={problem.url} target="_blank" rel="noopener noreferrer" style={{
+                                                    color: 'var(--title-color)',
+                                                    textDecoration: 'none'
+                                                }}>
+                                                    {problem.title}
+                                                </a>
+                                            </h3>
+                                            <div className="meta">
+                                                <span><b>ID:</b> {problem.id}</span>
+                                                <span style={{ marginLeft: 8 }}><b>Difficulty:</b> <span className={`difficulty-badge difficulty-${problem.difficulty}`}>{problem.difficulty}</span></span>
+                                                <span style={{ marginLeft: 8 }}><b>Rating:</b> {problem.rating || 'N/A'}</span>
+                                            </div>
+                                            {showTopics && problem.topics.length > 0 && (
+                                                <div className="badges">
                                                     {problem.topics.slice(0, 3).map((topic, index) => (
                                                         <span key={index} className="topic-badge">{topic}</span>
                                                     ))}
                                                 </div>
-                                            </td>
-                                        )}
-                                        <td data-label="Companies">
-                                            <div>
-                                                {(expandedCompanies[problem.id] ? problem.companies : problem.companies.slice(0, 3)).map((company, index) => (
-                                                    <span key={index} className="company-badge">{company}</span>
-                                                ))}
-                                                {problem.companies.length > 3 && !expandedCompanies[problem.id] && (
-                                                    <span
-                                                        className="company-badge"
-                                                        style={{ cursor: 'pointer' }}
-                                                        onClick={() => toggleCompanies(problem.id)}
-                                                    >
-                                                        +{problem.companies.length - 3}
-                                                    </span>
-                                                )}
-                                                {problem.companies.length > 3 && expandedCompanies[problem.id] && (
-                                                    <span
-                                                        className="company-badge"
-                                                        style={{ cursor: 'pointer' }}
-                                                        onClick={() => toggleCompanies(problem.id)}
-                                                    >
-                                                        …
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </td>
-                                        <td data-label="Difficulty">
-                                            <span className={`difficulty-badge difficulty-${problem.difficulty}`}>
-                                                {problem.difficulty}
-                                            </span>
-                                        </td>
-                                        <td data-label="Rating">{problem.rating || 'N/A'}</td>
-                                        <td data-label="Status">
+                                            )}
+                                            {problem.companies.length > 0 && (
+                                                <div className="badges">
+                                                    {(expandedCompanies[problem.id] ? problem.companies : problem.companies.slice(0, 3)).map((company, index) => (
+                                                        <span key={index} className="company-badge">{company}</span>
+                                                    ))}
+                                                    {problem.companies.length > 3 && !expandedCompanies[problem.id] && (
+                                                        <span
+                                                            className="company-badge"
+                                                            style={{ cursor: 'pointer' }}
+                                                            onClick={() => toggleCompanies(problem.id)}
+                                                        >
+                                                            +{problem.companies.length - 3}
+                                                        </span>
+                                                    )}
+                                                    {problem.companies.length > 3 && expandedCompanies[problem.id] && (
+                                                        <span
+                                                            className="company-badge"
+                                                            style={{ cursor: 'pointer' }}
+                                                            onClick={() => toggleCompanies(problem.id)}
+                                                        >
+                                                            …
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            )}
                                             <button
                                                 onClick={() => toggleCompleted(problem.id)}
                                                 className={`status-btn${completedProblems.includes(problem.id) ? ' completed' : ''}`}
+                                                style={{ marginTop: 8 }}
                                             >
                                                 {completedProblems.includes(problem.id) ? 'Done' : 'Mark Done'}
                                             </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
-                <p className="rating-na-note">
-                    * Ratings marked as "N/A" are for older problems and may not have official rating data.
-                </p>
-                {/* Pagination */}
-                {totalPages > 1 && (
-                    <div className="pagination">
-                        <button
-                            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                            disabled={currentPage === 1}
-                        >
-                            Prev
-                        </button>
-                        {getPageNumbers().map((pageNum, idx) => (
-                            <button
-                                key={idx}
-                                onClick={() => typeof pageNum === 'number' && setCurrentPage(pageNum)}
-                                disabled={pageNum === '...'}
-                                className={pageNum === currentPage ? 'active' : ''}
-                            >
-                                {pageNum}
-                            </button>
-                        ))}
-                        <button
-                            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                            disabled={currentPage === totalPages}
-                        >
-                            Next
-                        </button>
-                    </div>
-                )}
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="problems-table-container">
+                                    <table className="problems-table" style={{ width: '100%', tableLayout: 'fixed' }}>
+                                        <colgroup>
+                                            <col style={{ width: '6%' }} />
+                                            <col style={{ width: '35%' }} />
+                                            {showTopics && <col style={{ width: '22%' }} />}
+                                            <col style={{ width: '20%' }} />
+                                            <col style={{ width: '10%' }} />
+                                            <col style={{ width: '10%' }} />
+                                            <col style={{ width: '10%' }} />
+                                        </colgroup>
+                                        <thead>
+                                            <tr>
+                                                <th onClick={() => setSortConfig(prev => ({ key: 'id', direction: prev.key === 'id' && prev.direction === 'asc' ? 'desc' : 'asc' }))}>
+                                                    ID {sortConfig.key === 'id' && (sortConfig.direction === 'asc' ? '▲' : '▼')}
+                                                </th>
+                                                <th>Title</th>
+                                                {showTopics && <th>Topics</th>}
+                                                <th>Companies</th>
+                                                <th onClick={() => setSortConfig(prev => ({ key: 'difficulty', direction: prev.key === 'difficulty' && prev.direction === 'asc' ? 'desc' : 'asc' }))}>
+                                                    Difficulty {sortConfig.key === 'difficulty' && (sortConfig.direction === 'asc' ? '▲' : '▼')}
+                                                </th>
+                                                <th
+                                                    className={`sortable ${sortConfig.key === 'rating' ? 'sort-active' : ''} ${sortConfig.direction === 'asc' ? 'sort-asc' : ''}`}
+                                                    onClick={() => setSortConfig(prev => ({
+                                                        key: 'rating',
+                                                        direction: prev.key === 'rating' && prev.direction === 'asc' ? 'desc' : 'asc'
+                                                    }))}
+                                                >
+                                                    Rating <span className="sort-arrow">▲</span>
+                                                </th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {currentProblems.map((problem, idx) => (
+                                                <tr
+                                                    key={problem.id}
+                                                    className={completedProblems.includes(problem.id) ? 'completed-row' : ''}
+                                                >
+                                                    <td data-label="ID">{problem.id}</td>
+                                                    <td data-label="Title">
+                                                        <a href={problem.url} target="_blank" rel="noopener noreferrer" style={{
+                                                            color: '#2563eb',
+                                                            textDecoration: 'none',
+                                                            color: 'var(--title-color)'
+                                                        }}>
+                                                            {problem.title}
+                                                        </a>
+                                                    </td>
+                                                    {showTopics && (
+                                                        <td data-label="Topics">
+                                                            <div>
+                                                                {problem.topics.slice(0, 3).map((topic, index) => (
+                                                                    <span key={index} className="topic-badge">{topic}</span>
+                                                                ))}
+                                                            </div>
+                                                        </td>
+                                                    )}
+                                                    <td data-label="Companies">
+                                                        <div>
+                                                            {(expandedCompanies[problem.id] ? problem.companies : problem.companies.slice(0, 3)).map((company, index) => (
+                                                                <span key={index} className="company-badge">{company}</span>
+                                                            ))}
+                                                            {problem.companies.length > 3 && !expandedCompanies[problem.id] && (
+                                                                <span
+                                                                    className="company-badge"
+                                                                    style={{ cursor: 'pointer' }}
+                                                                    onClick={() => toggleCompanies(problem.id)}
+                                                                >
+                                                                    +{problem.companies.length - 3}
+                                                                </span>
+                                                            )}
+                                                            {problem.companies.length > 3 && expandedCompanies[problem.id] && (
+                                                                <span
+                                                                    className="company-badge"
+                                                                    style={{ cursor: 'pointer' }}
+                                                                    onClick={() => toggleCompanies(problem.id)}
+                                                                >
+                                                                    …
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                    <td data-label="Difficulty">
+                                                        <span className={`difficulty-badge difficulty-${problem.difficulty}`}>
+                                                            {problem.difficulty}
+                                                        </span>
+                                                    </td>
+                                                    <td data-label="Rating">{problem.rating || 'N/A'}</td>
+                                                    <td data-label="Status">
+                                                        <button
+                                                            onClick={() => toggleCompleted(problem.id)}
+                                                            className={`status-btn${completedProblems.includes(problem.id) ? ' completed' : ''}`}
+                                                        >
+                                                            {completedProblems.includes(problem.id) ? 'Done' : 'Mark Done'}
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                            <p className="rating-na-note">
+                                * Ratings marked as "N/A" are for older problems and may not have official rating data.
+                            </p>
+                            {/* Pagination */}
+                            {totalPages > 1 && (
+                                <div className="pagination">
+                                    <button
+                                        onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                                        disabled={currentPage === 1}
+                                    >
+                                        Prev
+                                    </button>
+                                    {getPageNumbers().map((pageNum, idx) => (
+                                        <button
+                                            key={idx}
+                                            onClick={() => typeof pageNum === 'number' && setCurrentPage(pageNum)}
+                                            disabled={pageNum === '...'}
+                                            className={pageNum === currentPage ? 'active' : ''}
+                                        >
+                                            {pageNum}
+                                        </button>
+                                    ))}
+                                    <button
+                                        onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                                        disabled={currentPage === totalPages}
+                                    >
+                                        Next
+                                    </button>
+                                </div>
+                            )}
 
-                { }
-                <div className="feedback-section">
-                    <h3 style={{ marginBottom: '12px' }}>Feedback</h3>
-                    <textarea
-                        value={feedback}
-                        onChange={(e) => setFeedback(e.target.value)}
-                        placeholder="Share your thoughts about the problems or suggest improvements..."
+                            <div className="feedback-section">
+                                <h3 style={{ marginBottom: '12px' }}>Feedback</h3>
+                                <textarea
+                                    value={feedback}
+                                    onChange={(e) => setFeedback(e.target.value)}
+                                    placeholder="Share your thoughts about the problems or suggest improvements..."
+                                />
+                                <button onClick={handleFeedbackSubmit}>
+                                    Submit Feedback
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    <Dashboard
+                        problems={problems}
+                        completedProblems={completedProblems}
+                        theme={theme}
                     />
-                    <button onClick={handleFeedbackSubmit}>
-                        Submit Feedback
-                    </button>
-                </div>
+                )}
             </div>
-        </div >
+        </div>
     );
 };
 
-
 export default Problems;
-
 
 export const VisitCounter = () => {
     const [visits, setVisits] = useState(null);
@@ -648,3 +738,101 @@ export const VisitCounter = () => {
         </div>
     );
 };
+
+function Dashboard({ problems, completedProblems, theme }) {
+    // Calculate stats
+    const solvedSet = new Set(completedProblems.map(String));
+    const solvedProblems = problems.filter(p => solvedSet.has(String(p.id)));
+    const totalSolved = solvedProblems.length;
+    const totalProblems = problems.length;
+    const diffStats = { easy: 0, medium: 0, hard: 0 };
+    const diffTotals = { easy: 0, medium: 0, hard: 0 };
+    const topicStats = {};
+    const allTopics = Array.from(new Set(problems.flatMap(p => p.topics || []))).sort();
+    problems.forEach(p => {
+        const diff = String(p.difficulty).toLowerCase();
+        if (diffTotals[diff] !== undefined) diffTotals[diff]++;
+        (p.topics || []).forEach(topic => {
+            if (!topicStats[topic]) topicStats[topic] = { count: 0, ratingSum: 0, ratingCount: 0, total: 0 };
+            topicStats[topic].total++;
+        });
+    });
+    solvedProblems.forEach(p => {
+        const diff = String(p.difficulty).toLowerCase();
+        if (diffStats[diff] !== undefined) diffStats[diff]++;
+        (p.topics || []).forEach(topic => {
+            if (!topicStats[topic]) topicStats[topic] = { count: 0, ratingSum: 0, ratingCount: 0, total: 0 };
+            topicStats[topic].count++;
+            if (typeof p.rating === 'number' && p.rating > 0) {
+                topicStats[topic].ratingSum += p.rating;
+                topicStats[topic].ratingCount++;
+            }
+        });
+    });
+    return (
+        <div style={{ padding: '2.5rem 1.5rem', maxWidth: 1100, margin: '0 auto' }}>
+            <h2 style={{ fontSize: '2.2rem', fontWeight: 800, color: 'var(--primary)', marginBottom: '2.2rem', textAlign: 'center', letterSpacing: '1px' }}>Progress Dashboard</h2>
+            
+            <div style={{ display: 'flex', gap: 36, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 48 }}>
+                {/* Circle Stat Cards */}
+                <CircleStat label="Total" value={`${totalSolved}/${totalProblems}`} color="var(--primary)" theme={theme} />
+                <CircleStat label="Easy" value={`${diffStats.easy}/${diffTotals.easy}`} color="#22c55e" theme={theme} />
+                <CircleStat label="Medium" value={`${diffStats.medium}/${diffTotals.medium}`} color="#f59e0b" theme={theme} />
+                <CircleStat label="Hard" value={`${diffStats.hard}/${diffTotals.hard}`} color="#ef4444" theme={theme} />
+            </div>
+            <div style={{ background: 'var(--card-bg)', borderRadius: 18, boxShadow: '0 2px 12px rgba(0,0,0,0.07)', padding: '2rem 2.5rem', margin: '0 auto', maxWidth: 900 }}>
+                <h3 style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--primary)', marginBottom: 18 }}>Per-Topic Progress</h3>
+                <div style={{ marginTop: 18, color: '#888', fontSize: 14, textAlign: 'center' ,marginBottom:18}}>
+                    Note: Avg. Rating is calculated only from the problems you have marked as done for each topic.
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 24 }}>
+                    {allTopics.length === 0 && (
+                        <div style={{ color: '#888', textAlign: 'center', gridColumn: '1/-1' }}>No topics found.</div>
+                    )}
+                    {allTopics.map(topic => {
+                        const stat = topicStats[topic] || { count: 0, ratingSum: 0, ratingCount: 0, total: 0 };
+                        return (
+                            <div key={topic} style={{ background: '#f8fafc', borderRadius: 14, boxShadow: '0 1px 6px rgba(0,0,0,0.04)', padding: '1.2rem 1.1rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                <div style={{ fontWeight: 700, fontSize: 18, color: 'var(--primary)', marginBottom: 6 }}>{topic}</div>
+                                <div style={{ fontSize: 15, color: '#555', marginBottom: 4 }}>Solved: <b>{stat.count}/{stat.total}</b></div>
+                                <div style={{ fontSize: 15, color: '#555' }}>Avg. Rating: <b>{stat.ratingCount > 0 ? (stat.ratingSum / stat.ratingCount).toFixed(1) : 'N/A'}</b></div>
+                            </div>
+                        );
+                    })}
+                </div>
+
+            </div>
+        </div>
+    );
+}
+
+// CircleStat component
+function CircleStat({ label, value, color, theme }) {
+    const [solved, total] = value.split('/');
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 140 }}>
+            <div style={{
+                width: 120,
+                height: 120,
+                borderRadius: '50%',
+                background: theme === 'dark' ? '#232b3a' : '#fff',
+                border: `4px solid ${color}`,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color,
+                boxShadow: '0 2px 10px rgba(0,0,0,0.07)',
+                marginBottom: 16,
+                padding: '0 10px',
+                boxSizing: 'border-box',
+                overflow: 'hidden',
+            }}>
+                <div style={{ fontWeight: 800, fontSize: 32, lineHeight: 1 }}>{solved}</div>
+                <div style={{ width: 36, height: 2, background: color, borderRadius: 2, margin: '6px 0' }} />
+                <div style={{ fontWeight: 600, fontSize: 18, color: color + 'bb', lineHeight: 1 }}>{total}</div>
+            </div>
+            <div style={{ fontSize: 17, color: color, fontWeight: 700 }}>{label}</div>
+        </div>
+    );
+}
