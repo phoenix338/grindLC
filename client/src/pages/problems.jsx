@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
 import { fetchProblems } from '../api/problems';
 import '../styles.css';
+import Select from 'react-select';
+
+// Normalize topic names (e.g., 'math' and 'Math' become 'Math')
+const normalizeTopic = t => t.charAt(0).toUpperCase() + t.slice(1).toLowerCase();
 
 // SVGs for sidebar
 const ChevronLeft = () => (
@@ -219,7 +223,9 @@ const Problems = ({ onLoaded }) => {
 
     const allCompanies = unique(problems.flatMap((p) => p.companies)).sort();
     const allDifficulties = unique(problems.map((p) => String(p.difficulty).toLowerCase()));
-    const allTopics = unique(problems.flatMap((p) => p.topics)).sort();
+    const allTopics = Array.from(
+        new Set(problems.flatMap(p => (p.topics || []).map(normalizeTopic)))
+    ).sort();
 
     const indexOfLastProblem = currentPage * problemsPerPage;
     const indexOfFirstProblem = indexOfLastProblem - problemsPerPage;
@@ -966,6 +972,9 @@ export const VisitCounter = () => {
 
 function Dashboard({ problems, completedProblems, theme, isMobile }) {
     // Calculate stats
+    const allTopics = Array.from(
+        new Set(problems.flatMap(p => (p.topics || []).map(normalizeTopic)))
+    ).sort();
     const solvedSet = new Set(completedProblems.map(String));
     const solvedProblems = problems.filter(p => solvedSet.has(String(p.id)));
     const totalSolved = solvedProblems.length;
@@ -973,29 +982,34 @@ function Dashboard({ problems, completedProblems, theme, isMobile }) {
     const diffStats = { easy: 0, medium: 0, hard: 0 };
     const diffTotals = { easy: 0, medium: 0, hard: 0 };
     const topicStats = {};
-    const allTopics = Array.from(new Set(problems.flatMap(p => p.topics || []))).sort();
+    const [topicSearch, setTopicSearch] = useState('');
     problems.forEach(p => {
         const diff = String(p.difficulty).toLowerCase();
         if (diffTotals[diff] !== undefined) diffTotals[diff]++;
         (p.topics || []).forEach(topic => {
-            if (!topicStats[topic]) topicStats[topic] = { count: 0, ratingSum: 0, ratingCount: 0, total: 0 };
-            topicStats[topic].total++;
+            const normTopic = normalizeTopic(topic);
+            if (!topicStats[normTopic]) topicStats[normTopic] = { count: 0, ratingSum: 0, ratingCount: 0, total: 0 };
+            topicStats[normTopic].total++;
         });
     });
     solvedProblems.forEach(p => {
         const diff = String(p.difficulty).toLowerCase();
         if (diffStats[diff] !== undefined) diffStats[diff]++;
         (p.topics || []).forEach(topic => {
-            if (!topicStats[topic]) topicStats[topic] = { count: 0, ratingSum: 0, ratingCount: 0, total: 0 };
-            topicStats[topic].count++;
+            const normTopic = normalizeTopic(topic);
+            if (!topicStats[normTopic]) topicStats[normTopic] = { count: 0, ratingSum: 0, ratingCount: 0, total: 0 };
+            topicStats[normTopic].count++;
             if (typeof p.rating === 'number' && p.rating > 0) {
-                topicStats[topic].ratingSum += p.rating;
-                topicStats[topic].ratingCount++;
+                topicStats[normTopic].ratingSum += p.rating;
+                topicStats[normTopic].ratingCount++;
             }
         });
     });
     const streak = 0; // Implement streak calculation
     const longestStreak = 0; // Implement longest streak calculation
+    const filteredTopics = topicSearch
+        ? allTopics.filter(topic => topic.toLowerCase().includes(topicSearch.toLowerCase()))
+        : allTopics;
     return (
         <div style={{ padding: isMobile ? '1.2rem 0.3rem' : '2.5rem 1.5rem', maxWidth: 1100, margin: '0 auto' }}>
             {streak > 0 || longestStreak > 0 && (
@@ -1051,6 +1065,25 @@ function Dashboard({ problems, completedProblems, theme, isMobile }) {
             </div>
             <div style={{ background: 'var(--card-bg)', borderRadius: 18, boxShadow: '0 2px 12px rgba(0,0,0,0.07)', padding: '2rem 2.5rem', margin: '0 auto', maxWidth: 900 }}>
                 <h3 style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--primary)', marginBottom: 18, textAlign: 'center' }}>Per-Topic Progress</h3>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 18 }}>
+                    <input
+                        type="text"
+                        value={topicSearch}
+                        onChange={e => setTopicSearch(e.target.value)}
+                        placeholder="Search topics..."
+                        style={{
+                            width: isMobile ? '90vw' : 320,
+                            maxWidth: '100%',
+                            padding: '0.6em 1em',
+                            borderRadius: 8,
+                            border: '1px solid var(--border-color)',
+                            fontSize: 15,
+                            margin: '0 auto',
+                            background: 'var(--background)',
+                            color: 'var(--primary)',
+                        }}
+                    />
+                </div>
                 <div style={{ marginTop: 18, color: '#888', fontSize: 14, textAlign: 'center', marginBottom: 18 }}>
                     Note: Avg. Rating is calculated only from the problems you have marked as done for each topic.
                 </div>
@@ -1065,10 +1098,10 @@ function Dashboard({ problems, completedProblems, theme, isMobile }) {
                         maxWidth: isMobile ? '100%' : 700,
                         marginTop: 0,
                     }}>
-                        {allTopics.length === 0 && (
+                        {filteredTopics.length === 0 && (
                             <div style={{ color: '#888', textAlign: 'center', gridColumn: '1/-1' }}>No topics found.</div>
                         )}
-                        {allTopics.map(topic => {
+                        {filteredTopics.map(topic => {
                             const stat = topicStats[topic] || { count: 0, ratingSum: 0, ratingCount: 0, total: 0 };
                             return (
                                 <div key={topic} style={{
