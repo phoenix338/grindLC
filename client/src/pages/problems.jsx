@@ -50,6 +50,9 @@ const Problems = ({ onLoaded }) => {
     });
     const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
     const [activePage, setActivePage] = useState('home');
+    const [showImportModal, setShowImportModal] = useState(false);
+    const [importJson, setImportJson] = useState('');
+    const [importError, setImportError] = useState('');
 
     // Get the width of the search input (default or custom):
     const filterInputWidth = isMobile ? '98vw' : '260px';
@@ -195,11 +198,12 @@ const Problems = ({ onLoaded }) => {
         }
     }, []);
     const toggleCompleted = (problemId) => {
+        const idNum = Number(problemId);
         setCompletedProblems(prev => {
-            if (prev.includes(problemId)) {
-                return prev.filter(id => id !== problemId);
+            if (prev.includes(idNum)) {
+                return prev.filter(id => id !== idNum);
             } else {
-                return [...prev, problemId];
+                return [...prev, idNum];
             }
         });
     };
@@ -294,6 +298,48 @@ const Problems = ({ onLoaded }) => {
             setSidebarCollapsed(false);
         }
     }, [isMobile]);
+
+    // Add this function to handle import
+    const handleImportSolved = () => {
+        setImportError('');
+        let parsed;
+        try {
+            parsed = JSON.parse(importJson);
+        } catch (e) {
+            setImportError('Invalid JSON. Please paste the full JSON from LeetCode.');
+            return;
+        }
+        if (!parsed.stat_status_pairs || !Array.isArray(parsed.stat_status_pairs)) {
+            setImportError('JSON format not recognized. Please ensure you copied from https://leetcode.com/api/problems/all/');
+            return;
+        }
+        // Use frontend_question_id for matching
+        const solvedIds = parsed.stat_status_pairs
+            .filter(pair => pair.status === 'ac')
+            .map(pair => Number(pair.stat.frontend_question_id)); // Make sure it's a number
+
+        if (solvedIds.length === 0) {
+            setImportError('No solved problems found in the pasted JSON.');
+            return;
+        }
+        // Find matching problems in our list
+        const matchingIds = problems
+            .filter(p => solvedIds.includes(Number(p.id))) // Make sure your local id is also a number
+            .map(p => p.id);
+
+        if (matchingIds.length === 0) {
+            setImportError('No matching problems found in your dashboard.');
+            return;
+        }
+        // Merge with current completedProblems
+        const newCompleted = Array.from(new Set([...completedProblems, ...matchingIds]));
+        setCompletedProblems(newCompleted);
+        localStorage.setItem('completedProblems', JSON.stringify(newCompleted));
+        setShowImportModal(false);
+        setImportJson('');
+        setImportError('');
+        alert(`Imported ${matchingIds.length} solved problems!`);
+    };
 
     if (loading) {
         return (
@@ -436,7 +482,7 @@ const Problems = ({ onLoaded }) => {
                     minHeight: isMobile ? 90 : 60
                 }}>
                     {/* Desktop: Title center, buttons right; Mobile: stacked */}
-                    {!isMobile && <div style={{ flex: 1, textAlign: 'center', fontWeight: 800, fontSize: '2rem', color: 'var(--primary)', letterSpacing: '1px', minWidth: 0 }}>GrindLC</div>}
+                    {!isMobile && <div style={{ flex: 1, textAlign: 'center', fontWeight: 800, fontSize: '2rem', color: 'var(--primary)', letterSpacing: '1px', minWidth: 0, marginLeft: '120px' }}>GrindLC</div>}
                     {/* Desktop: Title center, buttons right; Mobile: stacked */}
                     {!isMobile && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0, justifyContent: 'flex-end' }}>
@@ -492,6 +538,98 @@ const Problems = ({ onLoaded }) => {
                 {activePage === 'home' ? (
                     <div className="problems-container">
                         <div className="problems-inner">
+                            {/* Import Solved Button and Modal */}
+                            <div style={{ marginBottom: 18, textAlign: 'center', display: 'flex', justifyContent: 'center', gap: 12, flexWrap: 'wrap' }}>
+                                <button
+                                    style={{
+                                        background: 'var(--primary)',
+                                        color: '#fff',
+                                        border: 'none',
+                                        borderRadius: 8,
+                                        padding: '0.6em 1.2em',
+                                        fontWeight: 700,
+                                        fontSize: '1.08rem',
+                                        cursor: 'pointer',
+                                        boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
+                                    }}
+                                    onClick={() => setShowImportModal(true)}
+                                >
+                                    Import Solved from LeetCode
+                                </button>
+                                <button
+                                    style={{
+                                        background: '#f87171',
+                                        color: '#fff',
+                                        border: 'none',
+                                        borderRadius: 8,
+                                        padding: '0.6em 1.2em',
+                                        fontWeight: 700,
+                                        fontSize: '1.08rem',
+                                        cursor: 'pointer',
+                                        boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
+                                    }}
+                                    onClick={() => {
+                                        if (window.confirm('Are you sure you want to reset all "Done" marks? This cannot be undone.')) {
+                                            setCompletedProblems([]);
+                                            localStorage.setItem('completedProblems', JSON.stringify([]));
+                                        }
+                                    }}
+                                >
+                                    Reset All Done
+                                </button>
+                            </div>
+                            {showImportModal && (
+                                <div style={{
+                                    position: 'fixed',
+                                    top: 0,
+                                    left: 0,
+                                    width: '100vw',
+                                    height: '100vh',
+                                    background: 'rgba(0,0,0,0.35)',
+                                    zIndex: 9999,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                }}>
+                                    <div style={{
+                                        background: 'var(--card-bg)',
+                                        borderRadius: 14,
+                                        padding: '2.2rem 1.5rem',
+                                        maxWidth: 420,
+                                        width: '90vw',
+                                        boxShadow: '0 4px 24px rgba(0,0,0,0.13)',
+                                        position: 'relative',
+                                    }}>
+                                        <h3 style={{ marginBottom: 12, color: 'var(--primary)', fontWeight: 800, fontSize: 22, textAlign: 'center' }}>Import Solved Problems</h3>
+                                        <p style={{ fontSize: 15, marginBottom: 10, color: '#555', textAlign: 'center' }}>
+                                            1. Log in to LeetCode and visit <a href="https://leetcode.com/api/problems/all/" target="_blank" rel="noopener noreferrer">this page</a>.<br />
+                                            2. Copy all the text (Cmd+A, Cmd+C).<br />
+                                            3. Paste it below and click Import.
+                                        </p>
+                                        <textarea
+                                            value={importJson}
+                                            onChange={e => setImportJson(e.target.value)}
+                                            placeholder="Paste your LeetCode JSON here..."
+                                            style={{ width: '100%', minHeight: 120, borderRadius: 8, border: '1px solid #bbb', padding: 10, fontSize: 15, marginBottom: 10, fontFamily: 'monospace' }}
+                                        />
+                                        {importError && <div style={{ color: 'red', marginBottom: 8, fontSize: 14 }}>{importError}</div>}
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
+                                            <button
+                                                onClick={handleImportSolved}
+                                                style={{ background: 'var(--primary)', color: '#fff', border: 'none', borderRadius: 8, padding: '0.5em 1.2em', fontWeight: 700, fontSize: 15, cursor: 'pointer' }}
+                                            >
+                                                Import
+                                            </button>
+                                            <button
+                                                onClick={() => { setShowImportModal(false); setImportJson(''); setImportError(''); }}
+                                                style={{ background: '#eee', color: '#333', border: 'none', borderRadius: 8, padding: '0.5em 1.2em', fontWeight: 700, fontSize: 15, cursor: 'pointer' }}
+                                            >
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                             <div className="filters-section">
                                 <div className="filters-top">
                                     <input
@@ -536,17 +674,43 @@ const Problems = ({ onLoaded }) => {
                                     </div>
                                 </div>
                                 <div className="filters-bottom">
-                                    <button onClick={() => setShowTopics(!showTopics)}>
+                                    <button onClick={() => setShowTopics(!showTopics)}
+                                        style={{
+                                            background: 'var(--primary)',
+                                            color: '#fff',
+                                            border: 'none',
+                                            borderRadius: 8,
+                                            padding: '0.6em 1.2em',
+                                            fontWeight: 700,
+                                            fontSize: '1.08rem',
+                                            cursor: 'pointer',
+                                            boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
+                                        }}
+                                    >
                                         {showTopics ? 'Hide Topics' : 'Show Topics'}
                                     </button>
-                                    <button onClick={resetFilters}>Reset All</button>
+                                    <button onClick={resetFilters}
+                                        style={{
+                                            background: '#f87171',
+                                            color: '#fff',
+                                            border: 'none',
+                                            borderRadius: 8,
+                                            padding: '0.6em 1.2em',
+                                            fontWeight: 700,
+                                            fontSize: '1.08rem',
+                                            cursor: 'pointer',
+                                            boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
+                                        }}
+                                    >
+                                        Reset All
+                                    </button>
                                 </div>
                             </div>
 
                             {isMobile ? (
                                 <div>
                                     {currentProblems.map((problem, idx) => (
-                                        <div key={problem.id} className={`problem-card${completedProblems.includes(problem.id) ? ' completed-row' : ''}`}>
+                                        <div key={problem.id} className={`problem-card${completedProblems.includes(Number(problem.id)) ? ' completed-row' : ''}`}>
                                             <h3>
                                                 <a href={problem.url} target="_blank" rel="noopener noreferrer" style={{
                                                     color: 'var(--title-color)',
@@ -594,10 +758,10 @@ const Problems = ({ onLoaded }) => {
                                             )}
                                             <button
                                                 onClick={() => toggleCompleted(problem.id)}
-                                                className={`status-btn${completedProblems.includes(problem.id) ? ' completed' : ''}`}
+                                                className={`status-btn${completedProblems.includes(Number(problem.id)) ? ' completed' : ''}`}
                                                 style={{ marginTop: 8 }}
                                             >
-                                                {completedProblems.includes(problem.id) ? 'Done' : 'Mark Done'}
+                                                {completedProblems.includes(Number(problem.id)) ? 'Done' : 'Mark Done'}
                                             </button>
                                         </div>
                                     ))}
@@ -641,7 +805,7 @@ const Problems = ({ onLoaded }) => {
                                             {currentProblems.map((problem, idx) => (
                                                 <tr
                                                     key={problem.id}
-                                                    className={completedProblems.includes(problem.id) ? 'completed-row' : ''}
+                                                    className={completedProblems.includes(Number(problem.id)) ? 'completed-row' : ''}
                                                 >
                                                     <td data-label="ID">{problem.id}</td>
                                                     <td data-label="Title">
@@ -696,9 +860,9 @@ const Problems = ({ onLoaded }) => {
                                                     <td data-label="Status">
                                                         <button
                                                             onClick={() => toggleCompleted(problem.id)}
-                                                            className={`status-btn${completedProblems.includes(problem.id) ? ' completed' : ''}`}
+                                                            className={`status-btn${completedProblems.includes(Number(problem.id)) ? ' completed' : ''}`}
                                                         >
-                                                            {completedProblems.includes(problem.id) ? 'Done' : 'Mark Done'}
+                                                            {completedProblems.includes(Number(problem.id)) ? 'Done' : 'Mark Done'}
                                                         </button>
                                                     </td>
                                                 </tr>
