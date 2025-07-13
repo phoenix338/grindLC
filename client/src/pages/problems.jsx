@@ -189,6 +189,11 @@ const Problems = ({ onLoaded }) => {
                     ? (order[a.difficulty] || 0) - (order[b.difficulty] || 0)
                     : (order[b.difficulty] || 0) - (order[a.difficulty] || 0);
             }
+            if (sortConfig.key === 'companyCount') {
+                return sortConfig.direction === 'asc'
+                    ? (a.companies.length || 0) - (b.companies.length || 0)
+                    : (b.companies.length || 0) - (a.companies.length || 0);
+            }
             return 0;
         });
 
@@ -713,6 +718,29 @@ const Problems = ({ onLoaded }) => {
                                 </div>
                             </div>
 
+                            {isMobile && (
+                                <div style={{ margin: '0 0 12px 0', display: 'flex', justifyContent: 'flex-end' }}>
+                                    <select
+                                        value={sortConfig.key + '-' + sortConfig.direction}
+                                        onChange={e => {
+                                            const [key, direction] = e.target.value.split('-');
+                                            setSortConfig({ key, direction });
+                                        }}
+                                        className="compact-filter"
+                                        style={{ width: 180, minWidth: 0, height: 36, borderRadius: 8, border: '1px solid #cbd5e1', fontWeight: 500 }}
+                                    >
+                                        <option value="id-asc">ID (Ascending)</option>
+                                        <option value="id-desc">ID (Descending)</option>
+                                        <option value="rating-desc">Rating (High to Low)</option>
+                                        <option value="rating-asc">Rating (Low to High)</option>
+                                        <option value="difficulty-asc">Difficulty (Easy to Hard)</option>
+                                        <option value="difficulty-desc">Difficulty (Hard to Easy)</option>
+                                        <option value="companyCount-desc">Companies (Most Tags)</option>
+                                        <option value="companyCount-asc">Companies (Least Tags)</option>
+                                    </select>
+                                </div>
+                            )}
+
                             {isMobile ? (
                                 <div>
                                     {currentProblems.map((problem, idx) => (
@@ -791,7 +819,18 @@ const Problems = ({ onLoaded }) => {
                                                 </th>
                                                 <th>Title</th>
                                                 {showTopics && <th>Topics</th>}
-                                                <th>Companies</th>
+                                                <th
+                                                    className={`sortable ${sortConfig.key === 'companyCount' ? 'sort-active' : ''} ${sortConfig.direction === 'asc' ? 'sort-asc' : ''}`}
+                                                    onClick={() => setSortConfig(prev => {
+                                                        if (prev.key === 'companyCount') {
+                                                            return { key: 'companyCount', direction: prev.direction === 'asc' ? 'desc' : 'asc' };
+                                                        } else {
+                                                            return { key: 'companyCount', direction: 'desc' };
+                                                        }
+                                                    })}
+                                                >
+                                                    Companies {sortConfig.key === 'companyCount' && (sortConfig.direction === 'asc' ? '▲' : '▼')}
+                                                </th>
                                                 <th onClick={() => setSortConfig(prev => ({ key: 'difficulty', direction: prev.key === 'difficulty' && prev.direction === 'asc' ? 'desc' : 'asc' }))}>
                                                     Difficulty {sortConfig.key === 'difficulty' && (sortConfig.direction === 'asc' ? '▲' : '▼')}
                                                 </th>
