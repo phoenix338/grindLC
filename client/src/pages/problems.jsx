@@ -352,6 +352,18 @@ const Problems = ({ onLoaded }) => {
         alert(`Imported ${matchingIds.length} solved problems!`);
     };
 
+    // Calculate filtered solved count
+    const filteredSolvedCount = filteredProblems.filter(p => completedProblems.includes(Number(p.id))).length;
+
+    const isFilterApplied = (
+        search.trim() !== '' ||
+        companyFilter.trim() !== '' ||
+        difficultyFilter.trim() !== '' ||
+        topicFilter.trim() !== '' ||
+        ratingRange.min !== '' ||
+        ratingRange.max !== ''
+    );
+
     if (loading) {
         return (
             <div className="problems-container">
@@ -717,6 +729,13 @@ const Problems = ({ onLoaded }) => {
                                     </button>
                                 </div>
                             </div>
+
+                            {/* Show filtered solved count below filters, above problems list, only if a filter is applied */}
+                            {isFilterApplied && (
+                                <div style={{ margin: '10px 0 16px 0', fontWeight: 600, fontSize: 16, color: 'var(--primary)', textAlign: 'center' }}>
+                                    Solved: {filteredSolvedCount} / {filteredProblems.length}
+                                </div>
+                            )}
 
                             {isMobile && (
                                 <div style={{ margin: '0 0 12px 0', display: 'flex', justifyContent: 'flex-end' }}>
