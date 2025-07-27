@@ -38,7 +38,7 @@ const StarIcon = ({ filled, onClick }) => (
         onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            console.log('Star clicked!');
+            // console.log('Star clicked!');
             onClick();
         }}
         style={{
@@ -253,18 +253,18 @@ const Problems = ({ onLoaded }) => {
 
     const toggleFavorite = async (problemId) => {
         const idNum = Number(problemId);
-        console.log('Toggling favorite for problem:', idNum, 'Current favorites:', favoriteProblems);
+        // console.log('Toggling favorite for problem:', idNum, 'Current favorites:', favoriteProblems);
         try {
             if (favoriteProblems.includes(idNum)) {
-                console.log('Removing from favorites...');
+                // console.log('Removing from favorites...');
                 await removeFromFavorites(idNum);
                 setFavoriteProblems(prev => prev.filter(id => id !== idNum));
-                console.log('Removed from favorites');
+                // console.log('Removed from favorites');
             } else {
-                console.log('Adding to favorites...');
+                // console.log('Adding to favorites...');
                 await addToFavorites(idNum);
                 setFavoriteProblems(prev => [...prev, idNum]);
-                console.log('Added to favorites');
+                // console.log('Added to favorites');
             }
         } catch (error) {
             console.error('Error toggling favorite:', error);
@@ -771,7 +771,7 @@ const Problems = ({ onLoaded }) => {
                                     <button
                                         onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
                                         style={{
-                                            background: showFavoritesOnly ? '#fbbf24' : '#6b7280',
+                                            background: '#fbbf24',
                                             color: '#fff',
                                             border: 'none',
                                             borderRadius: 8,

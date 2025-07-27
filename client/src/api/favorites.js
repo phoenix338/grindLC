@@ -15,7 +15,7 @@ export const fetchFavorites = async (userId = 'default') => {
 
 export const addToFavorites = async (problemId, userId = 'default') => {
     try {
-        console.log('Adding to favorites:', problemId, 'for user:', userId);
+        // console.log('Adding to favorites:', problemId, 'for user:', userId);
         const response = await fetch(`${API_BASE_URL}/favorites`, {
             method: 'POST',
             headers: {
@@ -23,16 +23,16 @@ export const addToFavorites = async (problemId, userId = 'default') => {
             },
             body: JSON.stringify({ problemId, userId }),
         });
-
-        console.log('Response status:', response.status);
-
+        
+        // console.log('Response status:', response.status);
+        
         if (!response.ok) {
             const errorData = await response.json();
             throw new Error(errorData.error || 'Failed to add to favorites');
         }
-
+        
         const result = await response.json();
-        console.log('Successfully added to favorites:', result);
+        // console.log('Successfully added to favorites:', result);
         return result;
     } catch (error) {
         console.error('Error adding to favorites:', error);
@@ -42,12 +42,12 @@ export const addToFavorites = async (problemId, userId = 'default') => {
 
 export const removeFromFavorites = async (problemId, userId = 'default') => {
     try {
-        console.log('Removing from favorites:', problemId, 'for user:', userId);
+        // console.log('Removing from favorites:', problemId, 'for user:', userId);
         const response = await fetch(`${API_BASE_URL}/favorites/${problemId}/${userId}`, {
             method: 'DELETE',
         });
         
-        console.log('Response status:', response.status);
+        // console.log('Response status:', response.status);
         
         if (!response.ok) {
             const errorData = await response.json();
@@ -55,7 +55,7 @@ export const removeFromFavorites = async (problemId, userId = 'default') => {
         }
         
         const result = await response.json();
-        console.log('Successfully removed from favorites:', result);
+        // console.log('Successfully removed from favorites:', result);
         return result;
     } catch (error) {
         console.error('Error removing from favorites:', error);
