@@ -19,9 +19,11 @@ app.listen(PORT, HOST, () => {
 });
 import problemRoutes from './routes/problemRoute.js';
 import feedbackRoutes from './routes/feedbackroute.js';
+import favoriteRoutes from './routes/favoriteRoute.js';
 
 app.use('/api/problems', problemRoutes);
 app.use('/api/feedback', feedbackRoutes);
+app.use('/api/favorites', favoriteRoutes);
 import visitRoutes from './routes/visitroute.js';
 
 app.use('/api/visits', visitRoutes);

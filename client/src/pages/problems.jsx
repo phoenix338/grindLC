@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { fetchProblems } from '../api/problems';
+import { fetchFavorites, addToFavorites, removeFromFavorites } from '../api/favorites';
 import '../styles.css';
 import Select from 'react-select';
 
@@ -21,6 +22,32 @@ const ProgressIcon = () => (
         <rect x="3" y="12" width="4" height="8" rx="1" />
         <rect x="10" y="8" width="4" height="12" rx="1" />
         <rect x="17" y="4" width="4" height="16" rx="1" />
+    </svg>
+);
+
+const StarIcon = ({ filled, onClick }) => (
+    <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill={filled ? "currentColor" : "none"}
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Star clicked!');
+            onClick();
+        }}
+        style={{
+            cursor: 'pointer',
+            color: filled ? '#fbbf24' : '#6b7280',
+            transition: 'color 0.2s ease'
+        }}
+    >
+        <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" />
     </svg>
 );
 
@@ -57,6 +84,8 @@ const Problems = ({ onLoaded }) => {
     const [showImportModal, setShowImportModal] = useState(false);
     const [importJson, setImportJson] = useState('');
     const [importError, setImportError] = useState('');
+    const [favoriteProblems, setFavoriteProblems] = useState([]);
+    const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
 
     // Get the width of the search input (default or custom):
     const filterInputWidth = isMobile ? '98vw' : '260px';
@@ -99,28 +128,29 @@ const Problems = ({ onLoaded }) => {
     useEffect(() => {
         const loadProblems = async () => {
             try {
-                const data = await fetchProblems();
-                if (!Array.isArray(data)) throw new Error('Invalid data format received from API');
-
-                const validProblems = data.map((problem) => ({
-                    ...problem,
-                    difficulty: problem.difficulty || 'Unknown',
-                    topics: Array.isArray(problem.topics) ? problem.topics : Array.isArray(problem.tags) ? problem.tags : [],
-                    companies: Array.isArray(problem.companies) ? problem.companies : [],
-                    rating: typeof problem.rating === 'number' ? problem.rating : 0,
-                    title: problem.title || 'Untitled',
-                    id: problem.id || 'N/A',
-                }));
-
-                setProblems(validProblems);
-                onLoaded && onLoaded();
-                setLoading(false);
+                setLoading(true);
+                const problemsData = await fetchProblems();
+                setProblems(problemsData);
+                setError(null);
             } catch (err) {
-                setError(err.message);
+                console.error('Error loading problems:', err);
+                setError('Failed to load problems');
+            } finally {
                 setLoading(false);
             }
         };
+
+        const loadFavorites = async () => {
+            try {
+                const favorites = await fetchFavorites();
+                setFavoriteProblems(favorites);
+            } catch (err) {
+                console.error('Error loading favorites:', err);
+            }
+        };
+
         loadProblems();
+        loadFavorites();
     }, []);
 
     useEffect(() => {
@@ -176,6 +206,10 @@ const Problems = ({ onLoaded }) => {
             });
         }
 
+        if (showFavoritesOnly) {
+            filtered = filtered.filter((p) => favoriteProblems.includes(Number(p.id)));
+        }
+
         const sortedProblems = [...filtered].sort((a, b) => {
             if (sortConfig.key === 'id') {
                 return sortConfig.direction === 'asc' ? a.id - b.id : b.id - a.id;
@@ -199,7 +233,7 @@ const Problems = ({ onLoaded }) => {
 
         setFilteredProblems(sortedProblems);
         setCurrentPage(1);
-    }, [problems, search, companyFilter, difficultyFilter, topicFilter, ratingRange, sortConfig]);
+    }, [problems, search, companyFilter, difficultyFilter, topicFilter, ratingRange, sortConfig, showFavoritesOnly, favoriteProblems]);
     useEffect(() => {
         const saved = localStorage.getItem('theme');
         if (saved === 'dark') {
@@ -217,6 +251,26 @@ const Problems = ({ onLoaded }) => {
         });
     };
 
+    const toggleFavorite = async (problemId) => {
+        const idNum = Number(problemId);
+        console.log('Toggling favorite for problem:', idNum, 'Current favorites:', favoriteProblems);
+        try {
+            if (favoriteProblems.includes(idNum)) {
+                console.log('Removing from favorites...');
+                await removeFromFavorites(idNum);
+                setFavoriteProblems(prev => prev.filter(id => id !== idNum));
+                console.log('Removed from favorites');
+            } else {
+                console.log('Adding to favorites...');
+                await addToFavorites(idNum);
+                setFavoriteProblems(prev => [...prev, idNum]);
+                console.log('Added to favorites');
+            }
+        } catch (error) {
+            console.error('Error toggling favorite:', error);
+        }
+    };
+
     const resetFilters = () => {
         setSearch('');
         setCompanyFilter('');
@@ -224,6 +278,7 @@ const Problems = ({ onLoaded }) => {
         setTopicFilter('');
         setRatingRange({ min: '', max: '' });
         setSortConfig({ key: 'rating', direction: 'desc' });
+        setShowFavoritesOnly(false);
     };
 
     const allCompanies = unique(problems.flatMap((p) => p.companies)).sort();
@@ -361,7 +416,8 @@ const Problems = ({ onLoaded }) => {
         difficultyFilter.trim() !== '' ||
         topicFilter.trim() !== '' ||
         ratingRange.min !== '' ||
-        ratingRange.max !== ''
+        ratingRange.max !== '' ||
+        showFavoritesOnly
     );
 
     if (loading) {
@@ -712,6 +768,22 @@ const Problems = ({ onLoaded }) => {
                                     >
                                         {showTopics ? 'Hide Topics' : 'Show Topics'}
                                     </button>
+                                    <button
+                                        onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
+                                        style={{
+                                            background: showFavoritesOnly ? '#fbbf24' : '#6b7280',
+                                            color: '#fff',
+                                            border: 'none',
+                                            borderRadius: 8,
+                                            padding: '0.6em 1.2em',
+                                            fontWeight: 700,
+                                            fontSize: '1.08rem',
+                                            cursor: 'pointer',
+                                            boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
+                                        }}
+                                    >
+                                        {showFavoritesOnly ? 'Show All' : `Favorites (${favoriteProblems.length})`}
+                                    </button>
                                     <button onClick={resetFilters}
                                         style={{
                                             background: '#f87171',
@@ -764,7 +836,11 @@ const Problems = ({ onLoaded }) => {
                                 <div>
                                     {currentProblems.map((problem, idx) => (
                                         <div key={problem.id} className={`problem-card${completedProblems.includes(Number(problem.id)) ? ' completed-row' : ''}`}>
-                                            <h3>
+                                            <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <StarIcon
+                                                    filled={favoriteProblems.includes(Number(problem.id))}
+                                                    onClick={() => toggleFavorite(problem.id)}
+                                                />
                                                 <a href={problem.url} target="_blank" rel="noopener noreferrer" style={{
                                                     color: 'var(--title-color)',
                                                     textDecoration: 'none'
@@ -823,8 +899,9 @@ const Problems = ({ onLoaded }) => {
                                 <div className="problems-table-container">
                                     <table className="problems-table" style={{ width: '100%', tableLayout: 'fixed' }}>
                                         <colgroup>
-                                            <col style={{ width: '6%' }} />
-                                            <col style={{ width: '35%' }} />
+                                            <col style={{ width: '4%' }} />
+                                            <col style={{ width: '4%' }} />
+                                            <col style={{ width: '31%' }} />
                                             {showTopics && <col style={{ width: '22%' }} />}
                                             <col style={{ width: '20%' }} />
                                             <col style={{ width: '10%' }} />
@@ -836,6 +913,7 @@ const Problems = ({ onLoaded }) => {
                                                 <th onClick={() => setSortConfig(prev => ({ key: 'id', direction: prev.key === 'id' && prev.direction === 'asc' ? 'desc' : 'asc' }))}>
                                                     ID {sortConfig.key === 'id' && (sortConfig.direction === 'asc' ? '▲' : '▼')}
                                                 </th>
+                                                <th>★</th>
                                                 <th>Title</th>
                                                 {showTopics && <th>Topics</th>}
                                                 <th
@@ -872,6 +950,12 @@ const Problems = ({ onLoaded }) => {
                                                     className={completedProblems.includes(Number(problem.id)) ? 'completed-row' : ''}
                                                 >
                                                     <td data-label="ID">{problem.id}</td>
+                                                    <td data-label="Favorite" style={{ textAlign: 'center' }}>
+                                                        <StarIcon
+                                                            filled={favoriteProblems.includes(Number(problem.id))}
+                                                            onClick={() => toggleFavorite(problem.id)}
+                                                        />
+                                                    </td>
                                                     <td data-label="Title">
                                                         <a href={problem.url} target="_blank" rel="noopener noreferrer" style={{
                                                             color: '#2563eb',
