@@ -25,10 +25,10 @@ const ProgressIcon = () => (
     </svg>
 );
 
-const StarIcon = ({ filled, onClick }) => (
+const StarIcon = ({ filled, onClick, isMobile = false }) => (
     <svg
-        width="20"
-        height="20"
+        width={isMobile ? "24" : "20"}
+        height={isMobile ? "24" : "20"}
         viewBox="0 0 24 24"
         fill={filled ? "currentColor" : "none"}
         stroke="currentColor"
@@ -44,7 +44,9 @@ const StarIcon = ({ filled, onClick }) => (
         style={{
             cursor: 'pointer',
             color: filled ? '#fbbf24' : '#6b7280',
-            transition: 'color 0.2s ease'
+            transition: 'color 0.2s ease',
+            minWidth: isMobile ? '24px' : '20px',
+            minHeight: isMobile ? '24px' : '20px'
         }}
     >
         <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" />
@@ -232,8 +234,13 @@ const Problems = ({ onLoaded }) => {
         });
 
         setFilteredProblems(sortedProblems);
-        setCurrentPage(1);
-    }, [problems, search, companyFilter, difficultyFilter, topicFilter, ratingRange, sortConfig, showFavoritesOnly, favoriteProblems]);
+        // Only reset page when filters change, not when favorites are toggled
+        const shouldResetPage = search || companyFilter || difficultyFilter || topicFilter || ratingRange.min || ratingRange.max || showFavoritesOnly;
+        if (shouldResetPage) {
+            setCurrentPage(1);
+        }
+    }, [problems, search, companyFilter, difficultyFilter, topicFilter, ratingRange, sortConfig, showFavoritesOnly]);
+
     useEffect(() => {
         const saved = localStorage.getItem('theme');
         if (saved === 'dark') {
@@ -797,7 +804,7 @@ const Problems = ({ onLoaded }) => {
                                             boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
                                         }}
                                     >
-                                        Reset All
+                                        Reset Filters
                                     </button>
                                 </div>
                             </div>
@@ -840,6 +847,7 @@ const Problems = ({ onLoaded }) => {
                                                 <StarIcon
                                                     filled={favoriteProblems.includes(Number(problem.id))}
                                                     onClick={() => toggleFavorite(problem.id)}
+                                                    isMobile={true}
                                                 />
                                                 <a href={problem.url} target="_blank" rel="noopener noreferrer" style={{
                                                     color: 'var(--title-color)',
@@ -899,14 +907,14 @@ const Problems = ({ onLoaded }) => {
                                 <div className="problems-table-container">
                                     <table className="problems-table" style={{ width: '100%', tableLayout: 'fixed' }}>
                                         <colgroup>
-                                            <col style={{ width: '4%' }} />
-                                            <col style={{ width: '4%' }} />
-                                            <col style={{ width: '31%' }} />
-                                            {showTopics && <col style={{ width: '22%' }} />}
-                                            <col style={{ width: '20%' }} />
-                                            <col style={{ width: '10%' }} />
-                                            <col style={{ width: '10%' }} />
-                                            <col style={{ width: '10%' }} />
+                                            <col style={{ width: showTopics ? '5%' : '6%' }} />
+                                            <col style={{ width: showTopics ? '4%' : '5%' }} />
+                                            <col style={{ width: showTopics ? '25%' : '35%' }} />
+                                            {showTopics && <col style={{ width: '20%' }} />}
+                                            <col style={{ width: showTopics ? '18%' : '20%' }} />
+                                            <col style={{ width: showTopics ? '8%' : '10%' }} />
+                                            <col style={{ width: showTopics ? '8%' : '10%' }} />
+                                            <col style={{ width: showTopics ? '12%' : '14%' }} />
                                         </colgroup>
                                         <thead>
                                             <tr>
